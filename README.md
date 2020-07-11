@@ -1,4 +1,5 @@
-[![](https://jitci.com/gh/Kaj0Wortel/SimpleTools/svg)](https://jitci.com/gh/Kaj0Wortel/SimpleTools)
+[![Release](https://jitci.com/gh/Kaj0Wortel/SimpleTools/svg)](https://jitci.com/gh/Kaj0Wortel/SimpleTools)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 # SimpleTools
 
 A collection of various tools.
