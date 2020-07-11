@@ -18,6 +18,12 @@ dependencies {
 
     testCompileOnly 'org.projectlombok:lombok:1.18.12'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.12'
+
+    mainClassName = 'com.github.simple_tools.SimpleTools'
 }
 
-mainClassName = 'com.github.simple_tools.SimpleTools'
+test {
+//    useTestNG()
+    useJUnit()
+    failFast = true
+}
