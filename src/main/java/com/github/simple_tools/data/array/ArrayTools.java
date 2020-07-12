@@ -23,7 +23,6 @@ import java.util.function.Consumer;
 import com.github.simple_tools.MultiTool;
 import com.github.simple_tools.iterators.GeneratorIterator;
 
-
 /**
  * The {@code Array} class provides static methods to dynamically resolve
  * primitive typed arrays mixed with object arrays.
@@ -105,6 +104,20 @@ public final class ArrayTools {
         int nextIndex(Object array, int prevIndex);
         
         
+    }
+    
+    private abstract static class ReadOnlyArrayList<V>
+            extends AbstractList<V>
+            implements List<V>, RandomAccess {
+        
+        @Override
+        public abstract int size();
+
+        @Override
+        public abstract V get(int i);
+        
+        @Override
+        public abstract V set(int i, V v);
     }
     
     
@@ -321,7 +334,7 @@ public final class ArrayTools {
             throws IllegalArgumentException {
         if (array instanceof Object[]) {
             if (!(array instanceof Number[])) {
-                throw new IllegalArgumentException("Argument was not a number array!");
+                throw new IllegalArgumentException("Argument is not a number array!");
                 
             } else if (array instanceof Float[]) {
                 throw new IllegalArgumentException(
@@ -482,7 +495,7 @@ public final class ArrayTools {
             return;
         }
         if (!array.getClass().isArray()) {
-            throw new IllegalArgumentException("Argument was not an array!");
+            throw new IllegalArgumentException("Argument is not an array!");
         }
         if (!array.getClass().getComponentType().isArray()) {
             sb.append(toDeepString(array, radix));
@@ -528,9 +541,9 @@ public final class ArrayTools {
         else if (array instanceof float[]) return ((float[]) array).length;
         else if (array instanceof double[]) return ((double[]) array).length;
         else if (array == null)
-            throw new NullPointerException("Array was null!");
+            throw new NullPointerException("Array is null!");
         else if (!array.getClass().isArray())
-            throw new IllegalArgumentException("Argument was not an array!");
+            throw new IllegalArgumentException("Argument is not an array!");
         else
             throw new IllegalStateException();
     }
@@ -578,9 +591,9 @@ public final class ArrayTools {
         else if (array instanceof float[]) return (T) (Float) ((float[]) array)[index];
         else if (array instanceof double[]) return (T) (Double) ((double[]) array)[index];
         else if (array == null) {
-            throw new NullPointerException("Array was null!");    
+            throw new NullPointerException("Array is null!");    
         } else if (!array.getClass().isArray()) {
-            throw new IllegalArgumentException("Argument was not an array!");
+            throw new IllegalArgumentException("Argument is not an array!");
         }
         throw new IllegalStateException();
     }
@@ -820,10 +833,12 @@ public final class ArrayTools {
         else if (array instanceof long[]) ((long[]) array)[index] = (long) value;
         else if (array instanceof float[]) ((float[]) array)[index] = (float) value;
         else if (array instanceof double[]) ((double[]) array)[index] = (double) value;
-        else if (array == null) throw new NullPointerException("Array was null!");    
+        else if (array == null)
+            throw new NullPointerException("Array is null!");    
         else if (!array.getClass().isArray())
-            throw new IllegalArgumentException("Argument was not an array!");
-        else throw new IllegalStateException();
+            throw new IllegalArgumentException("Argument is not an array!");
+        else
+            throw new IllegalStateException();
     }
 
     /**
@@ -1016,7 +1031,331 @@ public final class ArrayTools {
      * ------------------------------------------------------------------------
      */
     /**
+     * Wraps an array in a list.
+     * Also wraps primitive data types in their class counter part.
+     * 
+     * @apiNote
+     * Runs in {@code O(1)}, but all addition and removal operations of the
+     * returned list will throw a {@link UnsupportedOperationException}.
+     * 
+     * @param array The array to convert.
+     * @param <V>   The type of list to create.
+     * 
+     * @return A write-through list representation of the provided array.
+     */
+    @SuppressWarnings("unchecked")
+    public static <V> List<V> asList(Object array) {
+        if (array instanceof Object[]) return asList((V[]) array);
+        if (array instanceof boolean[]) return (List<V>) asList((boolean[]) array);
+        if (array instanceof byte[]) return (List<V>) asList((byte[]) array);
+        if (array instanceof char[]) return (List<V>) asList((char[]) array);
+        if (array instanceof short[]) return (List<V>) asList((short[]) array);
+        if (array instanceof int[]) return (List<V>) asList((int[]) array);
+        if (array instanceof long[]) return (List<V>) asList((long[]) array);
+        if (array instanceof float[]) return (List<V>) asList((float[]) array);
+        if (array instanceof double[]) return (List<V>) asList((double[]) array);
+        if (array == null)
+            throw new NullPointerException("Array is null!");
+        if (!array.getClass().isArray())
+            throw new IllegalArgumentException("Argument is not an array!");
+        else
+            throw new IllegalStateException();
+    }
+
+    /**
+     * Wraps an Object array in a list.
+     * Equivalent to {@link Arrays#asList(Object...)}.
+     *
+     * @apiNote
+     * Runs in {@code O(1)}, but all addition and removal operations of the
+     * returned list will throw a {@link UnsupportedOperationException}.
+     *
+     * @param arr The array to convert.
+     * @param <V>   The type of list to create.
+     *
+     * @return A write-through list representation of the provided array.
+     */
+    public static <V> List<V> asList(V[] arr) {
+        return Arrays.asList(arr);
+    }
+
+    /**
+     * Wraps a {@code boolean[]} array in a {@link List<Boolean>} list.
+     *
+     * @apiNote
+     * Runs in {@code O(1)}, but all addition and removal operations of the
+     * returned list will throw a {@link UnsupportedOperationException}.
+     * Setting values will also alter the value in the original array,
+     * but {@code null} values will throw a {@link NullPointerException}.
+     *
+     * @param arr The array to convert.
+     *
+     * @return A write-through list representation of the provided array.
+     */
+    public static List<Boolean> asList(final boolean[] arr) {
+        return new ReadOnlyArrayList<>() {
+            @Override
+            public int size() {
+                return arr.length;
+            }
+
+            @Override
+            public Boolean get(int i) {
+                return arr[i];
+            }
+
+            @Override
+            public Boolean set(int i, Boolean b) {
+                final boolean old = arr[i];
+                arr[i] = b;
+                return old;
+            }
+        };
+    }
+    
+    /**
+     * Wraps a {@code byte[]} array in a {@link List<Byte>} list.
+     *
+     * @apiNote
+     * Runs in {@code O(1)}, but all addition and removal operations of the
+     * returned list will throw a {@link UnsupportedOperationException}.
+     * Setting values will also alter the value in the original array,
+     * but {@code null} values will throw a {@link NullPointerException}.
+     *
+     * @param arr The array to convert.
+     *
+     * @return A write-through list representation of the provided array.
+     */
+    public static List<Byte> asList(final byte[] arr) {
+        return new ReadOnlyArrayList<>() {
+            @Override
+            public int size() {
+                return arr.length;
+            }
+
+            @Override
+            public Byte get(int i) {
+                return arr[i];
+            }
+
+            @Override
+            public Byte set(int i, Byte b) {
+                final byte old = arr[i];
+                arr[i] = b;
+                return old;
+            }
+        };
+    }
+
+    /**
+     * Wraps a {@code char[]} array in a {@link List<Character>} list.
+     *
+     * @apiNote
+     * Runs in {@code O(1)}, but all addition and removal operations of the
+     * returned list will throw a {@link UnsupportedOperationException}.
+     * Setting values will also alter the value in the original array,
+     * but {@code null} values will throw a {@link NullPointerException}.
+     *
+     * @param arr The array to convert.
+     *
+     * @return A write-through list representation of the provided array.
+     */
+    public static List<Character> asList(final char[] arr) {
+        return new ReadOnlyArrayList<>() {
+            @Override
+            public int size() {
+                return arr.length;
+            }
+
+            @Override
+            public Character get(int i) {
+                return arr[i];
+            }
+
+            @Override
+            public Character set(int i, Character c) {
+                final char old = arr[i];
+                arr[i] = c;
+                return old;
+            }
+        };
+    }
+    
+    /**
+     * Wraps a {@code short[]} array in a {@link List<Short>} list.
+     *
+     * @apiNote
+     * Runs in {@code O(1)}, but all addition and removal operations of the
+     * returned list will throw a {@link UnsupportedOperationException}.
+     * Setting values will also alter the value in the original array,
+     * but {@code null} values will throw a {@link NullPointerException}.
+     *
+     * @param arr The array to convert.
+     *
+     * @return A write-through list representation of the provided array.
+     */
+    public static List<Short> asList(final short[] arr) {
+        return new ReadOnlyArrayList<>() {
+            @Override
+            public int size() {
+                return arr.length;
+            }
+
+            @Override
+            public Short get(int i) {
+                return arr[i];
+            }
+
+            @Override
+            public Short set(int i, Short s) {
+                final short old = arr[i];
+                arr[i] = s;
+                return old;
+            }
+        };
+    }
+    
+    /**
+     * Wraps a {@code int[]} array in a {@link List<Integer>} list.
+     *
+     * @apiNote
+     * Runs in {@code O(1)}, but all addition and removal operations of the
+     * returned list will throw a {@link UnsupportedOperationException}.
+     * Setting values will also alter the value in the original array,
+     * but {@code null} values will throw a {@link NullPointerException}.
+     *
+     * @param arr The array to convert.
+     *
+     * @return A write-through list representation of the provided array.
+     */
+    public static List<Integer> asList(final int[] arr) {
+        return new ReadOnlyArrayList<>() {
+            @Override
+            public int size() {
+                return arr.length;
+            }
+
+            @Override
+            public Integer get(int i) {
+                return arr[i];
+            }
+
+            @Override
+            public Integer set(int i, Integer b) {
+                final int old = arr[i];
+                arr[i] = b;
+                return old;
+            }
+        };
+    }
+
+    /**
+     * Wraps a {@code long[]} array in a {@link List<Long>} list.
+     *
+     * @apiNote
+     * Runs in {@code O(1)}, but all addition and removal operations of the
+     * returned list will throw a {@link UnsupportedOperationException}.
+     * Setting values will also alter the value in the original array,
+     * but {@code null} values will throw a {@link NullPointerException}.
+     *
+     * @param arr The array to convert.
+     *
+     * @return A write-through list representation of the provided array.
+     */
+    public static List<Long> asList(final long[] arr) {
+        return new ReadOnlyArrayList<>() {
+            @Override
+            public int size() {
+                return arr.length;
+            }
+
+            @Override
+            public Long get(int i) {
+                return arr[i];
+            }
+
+            @Override
+            public Long set(int i, Long b) {
+                final long old = arr[i];
+                arr[i] = b;
+                return old;
+            }
+        };
+    }
+
+    /**
+     * Wraps a {@code float[]} array in a {@link List<Float>} list.
+     *
+     * @apiNote
+     * Runs in {@code O(1)}, but all addition and removal operations of the
+     * returned list will throw a {@link UnsupportedOperationException}.
+     * Setting values will also alter the value in the original array,
+     * but {@code null} values will throw a {@link NullPointerException}.
+     *
+     * @param arr The array to convert.
+     *
+     * @return A write-through list representation of the provided array.
+     */
+    public static List<Float> asList(final float[] arr) {
+        return new ReadOnlyArrayList<>() {
+            @Override
+            public int size() {
+                return arr.length;
+            }
+
+            @Override
+            public Float get(int i) {
+                return arr[i];
+            }
+
+            @Override
+            public Float set(int i, Float b) {
+                final float old = arr[i];
+                arr[i] = b;
+                return old;
+            }
+        };
+    }
+
+    /**
+     * Wraps a {@code double[]} array in a {@link List<Double>} list.
+     *
+     * @apiNote
+     * Runs in {@code O(1)}, but all addition and removal operations of the
+     * returned list will throw a {@link UnsupportedOperationException}.
+     * Setting values will also alter the value in the original array,
+     * but {@code null} values will throw a {@link NullPointerException}.
+     *
+     * @param arr The array to convert.
+     *
+     * @return A write-through list representation of the provided array.
+     */
+    public static List<Double> asList(final double[] arr) {
+        return new ReadOnlyArrayList<>() {
+            @Override
+            public int size() {
+                return arr.length;
+            }
+
+            @Override
+            public Double get(int i) {
+                return arr[i];
+            }
+
+            @Override
+            public Double set(int i, Double b) {
+                final double old = arr[i];
+                arr[i] = b;
+                return old;
+            }
+        };
+    }
+    
+    /**
      * Converts the given array of any type to a list of the same type.
+     * 
+     * @apiNote
+     * This operation takes {@code O(n)} time.
      * 
      * @param array The array to convert.
      * 
@@ -1036,10 +1375,11 @@ public final class ArrayTools {
         if (array instanceof float[]) return (List<V>) toList((float[]) array);
         if (array instanceof double[]) return (List<V>) toList((double[]) array);
         if (array == null)
-            throw new NullPointerException("Array was null!");
+            throw new NullPointerException("Array is null!");
         if (!array.getClass().isArray())
-            throw new IllegalArgumentException("Argument was not an array!");
-        throw new IllegalStateException();
+            throw new IllegalArgumentException("Argument is not an array!");
+        else
+            throw new IllegalStateException();
     }
     
     /**
@@ -1241,7 +1581,7 @@ public final class ArrayTools {
     public static <V> V copyOf(Object src, int offSrc, V dst, int offDst, int len) {
         if (src == null || dst == null) throw new NullPointerException();
         if (!src.getClass().isArray() || !dst.getClass().isArray())
-            throw new IllegalArgumentException("Argument was not an array!");
+            throw new IllegalArgumentException("Argument is not an array!");
         if (len < 0)
             throw new IllegalArgumentException();
         
@@ -2451,9 +2791,6 @@ public final class ArrayTools {
      * @apiNote
      * The indices are set in increasing order from {@code off} to {@code off + len}.
      * 
-     * @todo
-     * test
-     * 
      * @param array The array set the data for.
      * @param off The offset to start setting values.
      * @param len The number of values to set.
@@ -2532,9 +2869,6 @@ public final class ArrayTools {
      * Sets the values of the array generated by the array processor.
      * This function is faster values compared to {@link #set(Object, int, Object)}
      * when setting multiple.
-     * 
-     * @todo
-     * test
      * 
      * @apiNote
      * The indices are set in increasing order from {@code off} to {@code off + len}.
@@ -2650,9 +2984,6 @@ public final class ArrayTools {
     /**
      * Generates an iterator over the given array.
      * It will iterate from {@code off} to {@code off + len}.
-     * 
-     * @todo
-     * test
      * 
      * @apiNote
      * The iterator will throw an {@link ClassCastException} <u>when iterating</u> if the

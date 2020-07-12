@@ -28,14 +28,11 @@ import com.github.simple_tools.data.collection.rb_tree.RBSearch.Choice;
  *   <tr><td><b>Space</b></td><td>O(n)</td><td>O(n)</td><td></td></tr>
  *   <tr><td><b>Search</b></td><td>O(log n)</td><td>O(log n)</td><td>{@link #search(RBSearch)},
  *       {@link #binarySearch(Comparable)}</td></tr>
- *   <tr><td><b>Insert</b></td><td>O(log n)</td><td>O(log n)</td><td>{@link #add(Comparable)}</td></tr>
+ *   <tr><td><b>Insert</b></td><td>O(log n)</td><td>O(log n)</td><td>{@link #add(Object)}</td></tr>
  *   <tr><td><b>Delete</b></td><td>O(log n)</td><td>O(log n)</td><td>{@link #remove(Object)}</td></tr>
- *   <tr><td><b>Neighbor</b></td><td>O(log n)</td><td>O(log n)</td><td>{@link #next(Comparable)},
- *       {@link #prev(Comparable)}</td></tr>
+ *   <tr><td><b>Neighbor</b></td><td>O(log n)</td><td>O(log n)</td><td>{@link #next(Object)},
+ *       {@link #prev(Object)}</td></tr>
  * </table>
- * Note that it is necessary that the function {@link Object#equals(Object)} is correctly implemented and
- * that their behaviour doesn't change for any inserted nodes. <br>
- * <br>
  * This balanced binary search tree does not support the {@code null} value.
  * <br>
  * Two equal elements cannot both be inserted. The last one will be rejected.
@@ -48,7 +45,8 @@ import com.github.simple_tools.data.collection.rb_tree.RBSearch.Choice;
  * 
  * @see LinkedRBTree
  */
-public class RBTree<D extends Comparable<D>>
+public class RBTree<D>
+        extends AbstractCollection<D>
         implements Collection<D>, Queue<D> {
 
     /* ------------------------------------------------------------------------
@@ -63,6 +61,7 @@ public class RBTree<D extends Comparable<D>>
      * Variables.
      * ------------------------------------------------------------------------
      */
+    final private Comparator<D> comparator;
     /** The size of the tree. */
     private int size = 0;
     /** The root node of the tree. */
@@ -103,24 +102,30 @@ public class RBTree<D extends Comparable<D>>
      */
     /**
      * Creates a new empty red-black tree.
+     * 
+     * @param comparator The comparator used to compare the elements.
      */
-    public RBTree() {
+    public RBTree(Comparator<D> comparator) {
+        this.comparator = comparator;
     }
     
     /**
      * Creates a new red-black tree from the given collection. <br>
      * Initializes the tree as balanced as possible. This initialization
      * is preferred over creating a new tree and then adding all elements
-     * with {@link #add(Comparable)}. <br>
+     * with {@link #add(Object)}. <br>
      * Note that this is equivalent to creating a new tree and then add all
      * elements using {@link #addAll(Collection)} in one go.
      * 
-     * @apiNote If the collection is almost sorted, then this creation takes
-     *     only {@code O(n)} time. Otherwise {@code O(n log(n))}.
-     * 
+     * @apiNote
+     * This operation takes {@code O(n log(n))} time for unsorted data
+     * and {@code O(n)} time for sorted data.
+     *
+     * @param comparator The comparator used to compare the elements.
      * @param col The collection to add.
      */
-    public RBTree(Collection<D> col) {
+    public RBTree(Comparator<D> comparator, Collection<D> col) {
+        this.comparator = comparator;
         addAll(col);
     }
 
@@ -128,17 +133,19 @@ public class RBTree<D extends Comparable<D>>
      * Creates a new red-black tree from the given array. <br>
      * Initializes the tree as balanced as possible. This initialization
      * is preferred over creating a new tree and then adding all elements
-     * with {@link #add(Comparable)}. <br>
+     * with {@link #add(Object)}. <br>
      * Note that this is equivalent to creating a new tree and then add all
      * elements using {@link #addAll(Collection)} in one go.
      *
      * @apiNote If the collection is almost sorted, then this creation takes
      *     only {@code O(n)} time. Otherwise {@code O(n log(n))}.
-     *
+     * 
+     * @param comparator The comparator used to compare the elements.
      * @param elems The array to add.
      */
     @SafeVarargs
-    public RBTree(D... elems) {
+    public RBTree(Comparator<D> comparator, D... elems) {
+        this.comparator = comparator;
         if (elems != null) {
             addAll(Arrays.asList(elems));
         }
@@ -234,14 +241,8 @@ public class RBTree<D extends Comparable<D>>
     }
 
     @Override
-    public boolean isEmpty() {
-        return size == 0;
-    }
-
-    @Override
     @SuppressWarnings("unchecked")
     public boolean contains(Object obj) {
-        if (!(obj instanceof Comparable)) return false;
         return get((D) obj) != null;
     }
 
@@ -259,7 +260,7 @@ public class RBTree<D extends Comparable<D>>
         RBNode<D> node = root;
         while (true) {
             if (node == null) return null;
-            Choice choice = search.evaluate(gd(node), gd(node.getLeft()), gd(node.getRight()));
+            Choice choice = search.evaluate(comparator, gd(node), gd(node.getLeft()), gd(node.getRight()));
             if (choice == Choice.GO_LEFT) node = node.getLeft();
             else if (choice == Choice.GO_RIGHT) node = node.getRight();
             else if (choice == Choice.CURRENT) return node.getData();
@@ -268,7 +269,46 @@ public class RBTree<D extends Comparable<D>>
             else return null;
         }
     }
-    
+
+    /**
+     * Performs a binary search on the tree.
+     * Uses the default comparator to search for the value.
+     * 
+     * @apiNote
+     * This function runs in {@code O(log(n))}.
+     * 
+     * @param target The target value to determine the index of.
+     * @param <V>    The type of the target value.
+     * 
+     * @return The index of the target value.
+     */
+    public <V extends D> D binarySearch(V target) {
+        RBNode<D> node = root;
+        while (true) {
+            if (node == null) return null;
+            int cmp = comparator.compare(target, gd(node));
+            if (cmp < 0) {
+                node = node.getLeft();
+            } else if (cmp > 0) {
+                node = node.getRight();
+            } else {
+                return gd(node);
+            }
+        }
+    }
+
+    /**
+     * Performs a binary search on the tree.
+     * Uses the comparable target to search for the value.
+     *
+     * @apiNote
+     * This function runs in {@code O(log(n))}.
+     * 
+     * @param target The target value to determine the index of.
+     * @param <V>    The type of the target value.
+     *
+     * @return The index of the target value.
+     */
     public <V extends Comparable<D>> D binarySearch(V target) {
         RBNode<D> node = root;
         while (true) {
@@ -301,7 +341,7 @@ public class RBTree<D extends Comparable<D>>
     protected RBNode<D> get(D key) {
         if (isEmpty()) return null;
         RBNode<D> node = getNearest(key);
-        if (node.equals(key)) return node;
+        if (comparator.compare(node.getData(), key) == 0) return node;
         else return null;
     }
     
@@ -316,7 +356,7 @@ public class RBTree<D extends Comparable<D>>
         RBNode<D> prev = null;
         while (node != null) {
             prev = node;
-            int cmp = key.compareTo(node.getData());
+            int cmp = comparator.compare(key, node.getData());
             if (cmp < 0) node = node.getLeft();
             else if (cmp > 0) node = node.getRight();
             else return node;
@@ -423,21 +463,6 @@ public class RBTree<D extends Comparable<D>>
     }
     
     @Override
-    public Object[] toArray() {
-        return toArray(new Object[size]);
-    }
-    
-    @Override
-    @SuppressWarnings("unchecked")
-    public <D1> D1[] toArray(D1[] arr) {
-        int i = 0;
-        for (D data : this) {
-            arr[i++] = (D1) data;
-        }
-        return arr;
-    }
-    
-    @Override
     public boolean add(D data) {
         if (data == null) throw new NullPointerException();
         RBNode<D> node = bstInsert(data);
@@ -476,10 +501,10 @@ public class RBTree<D extends Comparable<D>>
         }
         
         RBNode<D> near = getNearest(data);
-        if (near.equals(data)) return null;
+        if (comparator.compare(near.getData(), data) == 0) return null;
         // There are free leaves.
         RBNode<D> node = createNode(data);
-        int cmp = node.getData().compareTo(near.getData());
+        int cmp = comparator.compare(node.getData(), near.getData());
         if (cmp < 0 || (cmp == 0 && node.hashCode() < near.hashCode())) {
             // near.getLeft() == null
             setLeft(near, node);
@@ -550,7 +575,6 @@ public class RBTree<D extends Comparable<D>>
     @SuppressWarnings("unchecked")
     public boolean remove(Object obj) {
         if (obj == null) throw new NullPointerException();
-        if (!(obj instanceof Comparable)) return false;
         return remove(get((D) obj));
     }
     
@@ -907,7 +931,7 @@ public class RBTree<D extends Comparable<D>>
      * @return The next data element.
      */
     public D next(D data) {
-        if (data.equals(max.getData())) return null;
+        if (comparator.compare(data, max.getData()) == 0) return null;
         return gd(next(get(data)));
     }
     
@@ -940,7 +964,7 @@ public class RBTree<D extends Comparable<D>>
      * @return The previous data element.
      */
     public D prev(D data) {
-        if (data.equals(min.getData())) return null;
+        if (comparator.compare(data, min.getData()) == 0) return null;
         return gd(prev(get(data)));
     }
     
@@ -968,17 +992,6 @@ public class RBTree<D extends Comparable<D>>
     }
     
     @Override
-    @SuppressWarnings("element-type-mismatch")
-    public boolean containsAll(Collection<?> c) {
-        for (Object obj : c) {
-            if (!contains(obj)) {
-                return false;
-            }
-        }
-        return true;
-    }
-    
-    @Override
     @SuppressWarnings("unchecked")
     public boolean addAll(Collection<? extends D> col) {
         if (col.isEmpty()) return false;
@@ -990,7 +1003,7 @@ public class RBTree<D extends Comparable<D>>
                     nodes[i++] = createNode(d);
                 }
             }
-            Arrays.sort(nodes);
+            Arrays.sort(nodes, (n1, n2) -> comparator.compare(n1.getData(), n2.getData()));
             initTree(nodes);
             return true;
             
@@ -1002,30 +1015,27 @@ public class RBTree<D extends Comparable<D>>
             return changed;
         }
     }
-    
-    @Override
-    @SuppressWarnings("element-type-mismatch")
-    public boolean removeAll(Collection<?> c) {
-        boolean changed = false;
-        for (Object obj : c) {
-            if (remove(obj)) changed = true;
-        }
-        return changed;
-    }
-    
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @apiNote
+     * This function runs in {@code O(n + k)}, with {@code tree.size() == n}
+     * and {@code col.size() == k}.
+     */
     @Override
     @SuppressWarnings({"unchecked", "ToArrayCallWithZeroLengthArrayArgument"})
     public boolean retainAll(Collection<?> col) {
         if (col == null) throw new NullPointerException();
         if (isEmpty()) return false;
         
-        Set<Comparable<D>> data = (col instanceof Set
-                ? (Set<Comparable<D>>) col
+        Set<D> data = (col instanceof Set
+                ? (Set<D>) col
                 : new HashSet<>((Collection<D>) col));
         List<RBNode<D>> keep = new ArrayList<>();
         List<RBNode<D>> remove = new ArrayList<>();
         {
-        RBNode<D> node = min;
+            RBNode<D> node = min;
             do {
                 if (data.contains(node.getData())) keep.add(node);
                 else remove.add(node);
@@ -1039,7 +1049,7 @@ public class RBTree<D extends Comparable<D>>
         // Simply take the fastest one.
         int n = size();
         int k = keep.size();
-        if (k > 0.5*(k+1)*(2*n-k)*Math.log(n) / LOG2) {
+        if (k > 0.5 * (k + 1) * (2 * n - k) * Math.log(n) / LOG2) {
             // Deleting k items is faster.
             for (RBNode<D> node : remove) {
                 remove(node);
@@ -1178,7 +1188,7 @@ public class RBTree<D extends Comparable<D>>
     /**
      * @return A string used for debugging.
      */
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "UnusedReturnValue"})
     protected String debug() {
         StringBuilder sb = new StringBuilder();
         RBNode<D> n = min;

@@ -17,6 +17,7 @@
 package com.github.simple_tools.data.collection.rb_tree;
 
 import java.util.Collection;
+import java.util.Comparator;
 
 /**
  * Class implementing a linked red-black tree search tree. It supports the following operations:
@@ -31,11 +32,9 @@ import java.util.Collection;
  *   <tr><td><b>Neighbor</b></td><td>O(1)</td><td>O(1)</td><td>{@link #next(LinkedRBKey)},
  *       {@link #prev(LinkedRBKey)}, <br> {@link LinkedRBKey#next()}, {@link LinkedRBKey#prev()}</td></tr>
  * </table>
- * Note that it is necessary that the functions {@link Object#hashCode()} and {@link Object#equals(Object)}
- * are correctly implemented and that their behaviour doesn't change for any inserted nodes. <br>
+ * This balanced binary search tree does not support the {@code null} value.
  * <br>
- * This balanced binary search tree supports inserting unequal keys with equal value and hash code, but. <br>
- * Inserting the same element multiple times is not supported. <br>
+ * Two equal elements cannot both be inserted. The last one will be rejected.
  * <br>
  * This implementation is <b>NOT</b> thread safe. <br>
  * <br>
@@ -56,31 +55,39 @@ public class LinkedRBTree<D extends LinkedRBKey<D>>
      */
     /**
      * Creates a new empty linked red-black tree.
+     * 
+     * @param comparator The comparator used to compare the elements.
+     * 
+     * @see RBTree#RBTree(Comparator);
      */
-    public LinkedRBTree() {
+    public LinkedRBTree(Comparator<D> comparator) {
+        super(comparator);
     }
     
     /**
      * Creates a new linked red-black tree from the given collection.
      * 
+     * @param comparator The comparator used to compare the elements.
      * @param col The collection to add.
      * 
-     * @see RBTree#RBTree(Collection)
+     * @see RBTree#RBTree(Comparator, Collection)
      */
-    public LinkedRBTree(Collection<D> col) {
-        super(col);
+    public LinkedRBTree(Comparator<D> comparator, Collection<D> col) {
+        super(comparator, col);
     }
 
     /**
      * Creates a new linked red-black tree from the given collection.
-     *
+     * 
+     * @param comparator The comparator used to compare the elements.
      * @param elems The collection to add.
-     *
-     * @see RBTree#RBTree(Comparable...)
+     * 
+     * @see RBTree#RBTree(Comparator, Object[])
      */
     @SafeVarargs
-    public LinkedRBTree(D... elems) {
-        super(elems);
+    @SuppressWarnings("JavaDoc")
+    public LinkedRBTree(Comparator<D> comparator, D... elems) {
+        super(comparator, elems);
     }
     
     
@@ -123,7 +130,7 @@ public class LinkedRBTree<D extends LinkedRBKey<D>>
     }
     
     @Override
-    public RBNode<D> next(RBNode<D> node) {
+    protected RBNode<D> next(RBNode<D> node) {
         if (node instanceof LinkedRBNode) {
             return ((LinkedRBNode<D>) node).getNext();
         } else {
@@ -199,7 +206,8 @@ public class LinkedRBTree<D extends LinkedRBKey<D>>
     /**
      * {@inheritDoc}
      * 
-     * @deprecated This function should not be used in the linked variant of the tree. <br>
+     * @deprecated This function should not be used in the linked variant of the tree,
+     *     as it is slower compared to the alternative. <br>
      *     Use the {@link LinkedRBKey#parent()}, {@link LinkedRBKey#left()}, {@link LinkedRBKey#right()},
      *     {@link LinkedRBKey#next()} and {@link LinkedRBKey#prev()} functions instead.
      */

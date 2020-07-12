@@ -16,6 +16,8 @@
 
 package com.github.simple_tools.data.collection.rb_tree;
 
+import java.util.Comparator;
+
 /**
  * Search function used to find items in the {@link RBTree} data structure. <br>
  * 
@@ -24,7 +26,7 @@ package com.github.simple_tools.data.collection.rb_tree;
  * @see RBTree
  */
 @FunctionalInterface
-public interface RBSearch<D extends Comparable<D>> {
+public interface RBSearch<D> {
     
     /**
      * Enum denoting the options allowed for searching through the tree.
@@ -53,15 +55,16 @@ public interface RBSearch<D extends Comparable<D>> {
      * If {@code null} is returned, then the search is aborted and {@code null} is
      * returned by tne search function.
      * 
-     * @param cur The current data. Is never {@code null}.
-     * @param left The data on the left. Can be {@code null}.
-     * @param right The data on the right. Can be {@code null}.
+     * @param comparator The comparator used to compare the nodes.
+     * @param cur        The current data. Is never {@code null}.
+     * @param left       The data on the left. Can be {@code null}.
+     * @param right      The data on the right. Can be {@code null}.
      * 
      * @return The option to be made, or {@code null} to stop the search {@code null}.
      * 
      * @see Choice
      */
-    Choice evaluate(D cur, D left, D right);
+    Choice evaluate(Comparator<D> comparator, D cur, D left, D right);
     
     
 }

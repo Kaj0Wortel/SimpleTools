@@ -17,18 +17,12 @@
 package com.github.simple_tools.data.collection.rb_tree;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.github.simple_tools.AbstractTest;
 import com.github.simple_tools.data.array.ArrayTools;
 import lombok.AllArgsConstructor;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -52,13 +46,9 @@ public class RBTreeTest
     @AllArgsConstructor
     private static class Key
             extends LinkedRBKey<Key> {
-        final private int i;
-        final private int j;
-        
-        @Override
-        public int compareTo(Key key) {
-            return Integer.compare(i, key.i);
-        }
+        public static final Comparator<Key> COMPARATOR = Comparator.comparingInt(k -> k.i);;
+        private final int i;
+        private final int j;
         
         @Override
         public String toString() {
@@ -73,11 +63,46 @@ public class RBTreeTest
         @Override
         public boolean equals(Object obj) {
             if (!(obj instanceof Key)) return false;
-            Key key = (Key) obj;
-            return key.i == i;
+            Key k = (Key) obj;
+            return k.i == i;
+        }
+    }
+    
+    /**
+     * key class used to simulate key collisions.
+     */
+    @AllArgsConstructor
+    private static class KeyKey
+            implements Comparable<Key> {
+        final private Key key;
+        
+        @Override
+        public String toString() {
+            return key.toString();
+        }
+
+        @Override
+        public int compareTo(Key k) {
+            return Key.COMPARATOR.compare(key, k);
         }
         
+        @Override
+        public int hashCode() {
+            return key.hashCode();
+        }
         
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof Key) {
+                Key k = (Key) obj;
+                return Objects.equals(k, key);
+                
+            } else if (obj instanceof KeyKey) {
+                KeyKey k = (KeyKey) obj;
+                return Objects.equals(k.key, key);
+            }
+            return false;
+        }
     }
     
     @AllArgsConstructor
@@ -86,14 +111,13 @@ public class RBTreeTest
         final private int key;
 
         @Override
+        public String toString() {
+            return Integer.toString(key);
+        }
+
+        @Override
         public int compareTo(Integer i) {
             return Integer.compare(key, i);
-        }
-        
-        @Override
-        public boolean equals(Object obj) {
-            if (!(obj instanceof Integer)) return false;
-            return (int) obj == key;
         }
     }
     
@@ -104,7 +128,7 @@ public class RBTreeTest
      */
     @Test
     public void get0() {
-        RBTree<Integer> tree = new RBTree<>();
+        RBTree<Integer> tree = new RBTree<>(Integer::compare);
         tree.add(10);
         assertEquals("Error while getting single element!", 10, (int) tree.get(0));
     }
@@ -112,7 +136,7 @@ public class RBTreeTest
     @Test
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
     public void get1() {
-        RBTree<Integer> tree = new RBTree<>();
+        RBTree<Integer> tree = new RBTree<>(Integer::compare);
         expEx(IndexOutOfBoundsException.class, () -> tree.get(-1));
         expEx(IndexOutOfBoundsException.class, () -> tree.get(0));
         expEx(IndexOutOfBoundsException.class, () -> tree.get(1));
@@ -123,7 +147,7 @@ public class RBTreeTest
     
     @Test
     public void get2() {
-        RBTree<Integer> tree = new RBTree<>();
+        RBTree<Integer> tree = new RBTree<>(Integer::compare);
         int amt = 1_000_000;
         for (int i = 0; i < amt; i++) {
             tree.add(i);
@@ -139,7 +163,7 @@ public class RBTreeTest
     @Test
     public void get3() {
         int amt = 1_000_000;
-        RBTree<Integer> tree = new RBTree<>(ArrayTools.toList(genIntArr(amt)));
+        RBTree<Integer> tree = new RBTree<>(Integer::compare, ArrayTools.asList(genIntArr(amt)));
         for (int i = 0; i < amt; i++) {
             int rtn = tree.get(i);
             assertEquals("Wrong returned value!", i, rtn);
@@ -148,7 +172,7 @@ public class RBTreeTest
     
     @Test
     public void add0() {
-        RBTree<Integer> tree = new RBTree<>();
+        RBTree<Integer> tree = new RBTree<>(Integer::compare);
         assertTrue("The element could not be added!", tree.add(1));
         assertTrue("The element is not contained in the tree!", tree.contains(1));
         assertEquals("The size of the tree is incorrect", 1, tree.size());
@@ -156,7 +180,7 @@ public class RBTreeTest
     
     @Test
     public void add1() {
-        RBTree<Integer> tree = new RBTree<>();
+        RBTree<Integer> tree = new RBTree<>(Integer::compare);
         List<Integer> list = List.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
         assertTrue("The elements could not be added!", tree.addAll(list));
         for (int i : list) {
@@ -171,7 +195,7 @@ public class RBTreeTest
      */
     @Test
     public void remove0() {
-        RBTree<Integer> tree = new RBTree<>();
+        RBTree<Integer> tree = new RBTree<>(Integer::compare);
         tree.add(0);
         tree.remove(0);
         assertEquals("Incorrect tree size!", 0, tree.size());
@@ -184,7 +208,7 @@ public class RBTreeTest
     @Test
     @SuppressWarnings("UseBulkOperation")
     public void remove1() {
-        RBTree<Integer> tree = new RBTree<>();
+        RBTree<Integer> tree = new RBTree<>(Integer::compare);
         List<Integer> add = new ArrayList<>(List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
         List<Integer> rem = new ArrayList<>(List.of(4, 7, 9, 5));
         for (int i : add) {
@@ -235,7 +259,7 @@ public class RBTreeTest
     public void iterate0() {
         runAndWait(() -> {
             int err = 0;
-            RBTree<Integer> tree = new RBTree<>();
+            RBTree<Integer> tree = new RBTree<>(Integer::compare);
             List<Integer> list = new ArrayList<>(List.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
             Collections.shuffle(list);
             tree.addAll(list);
@@ -273,7 +297,7 @@ public class RBTreeTest
      * Deterministically retains some elements from the tree.
      */
     public void retainAll(int amt) {
-        RBTree<Integer> tree = new RBTree<>();
+        RBTree<Integer> tree = new RBTree<>(Integer::compare);
         Set<Integer> in = new HashSet<>();
         Set<Integer> out = new HashSet<>();
         for (int i = 0; i < amt; i++) {
@@ -307,9 +331,8 @@ public class RBTreeTest
      * This test should be used to replay scenarios from the random generator.
      */
 //    @Test
-    @Ignore
     public void replay() {
-        LinkedRBTree<Key> tree = new LinkedRBTree<>();
+        LinkedRBTree<Key> tree = new LinkedRBTree<>(Key.COMPARATOR);
         Key[] add = new Key[] {
             new Key(0, 1), new Key(1, 0), new Key(0, 0)
         };
@@ -354,12 +377,12 @@ public class RBTreeTest
      */
     @Test
     public void genRandom() {
-        runAndWait(() -> genRandom(10_000, 500, 1, RBTree.class), 32, 2000);
-        runAndWait(() -> genRandom(10_000, 500, 100, RBTree.class), 32, 2000);
-        runAndWait(() -> genRandom(250_000, 4000, 50, RBTree.class), 4, 5_000);
-        runAndWait(() -> genRandom(10_000, 500, 1, LinkedRBTree.class), 32, 2000);
-        runAndWait(() -> genRandom(10_000, 500, 100, LinkedRBTree.class), 32, 2000);
-        runAndWait(() -> genRandom(250_000, 4000, 50, LinkedRBTree.class), 4, 5_000);
+        runAndWait(() -> genRandom(10_000, 500, 1, RBTree.class), 32, 5_000);
+        runAndWait(() -> genRandom(10_000, 500, 100, RBTree.class), 32, 5_000);
+        runAndWait(() -> genRandom(250_000, 4000, 50, RBTree.class), 4, 20_000);
+        runAndWait(() -> genRandom(10_000, 500, 1, LinkedRBTree.class), 32, 5_000);
+        runAndWait(() -> genRandom(10_000, 500, 100, LinkedRBTree.class), 32, 5_000);
+        runAndWait(() -> genRandom(250_000, 4000, 50, LinkedRBTree.class), 4, 20_000);
     }
     
     /**
@@ -393,7 +416,7 @@ public class RBTreeTest
         
         //LinkedRBTree<Key> tree = new LinkedRBTree<>(Arrays.asList(add));
 //        RBTree<Key> tree = new RBTree<>();
-        RBTree<Key> tree = treeClass.getConstructor().newInstance();
+        RBTree<Key> tree = treeClass.getConstructor(Comparator.class).newInstance(Key.COMPARATOR);
         
         int err = 0;
         for (Key k : add) {
@@ -447,10 +470,12 @@ public class RBTreeTest
     
     @Test
     public void rootMinMax0() {
-        RBTree<Integer> tree = new RBTree<>(1);
+        RBTree<Integer> tree = new RBTree<>(Integer::compare, 1);
         assertEquals((Object) tree.getRoot(), 1);
         assertEquals((Object) tree.getMin(), 1);
         assertEquals((Object) tree.getMax(), 1);
+        assertNull(tree.prev(1));
+        assertNull(tree.next(1));
         
         tree.remove(1);
         assertNull(tree.getRoot());
@@ -461,7 +486,8 @@ public class RBTreeTest
     @Test
     public void rootMinMax1() {
         Key key = new Key(0, 0);
-        LinkedRBTree<Key> tree = new LinkedRBTree<>(key);
+        LinkedRBTree<Key> tree = new LinkedRBTree<>(Key.COMPARATOR, key);
+        
         assertEquals(tree.getRoot(), key);
         assertTrue(tree.getRoot().isRoot());
         assertFalse(tree.getRoot().hasParent());
@@ -471,12 +497,14 @@ public class RBTreeTest
         assertNull(tree.getMin().left());
         assertFalse(tree.getMin().hasPrev());
         assertNull(tree.getMin().prev());
+        assertNull(tree.prev(tree.getMin()));
         
         assertEquals(tree.getMax(), key);
         assertFalse(tree.getMax().hasRight());
         assertNull(tree.getMax().right());
         assertFalse(tree.getMax().hasNext());
         assertNull(tree.getMin().next());
+        assertNull(tree.next(tree.getMax()));
         
         tree.remove(key);
         assertNull(tree.getRoot());
@@ -496,10 +524,17 @@ public class RBTreeTest
             max = Math.max(max, arr[i]);
         }
         ArrayTools.shuffle(arr);
-        final RBTree<Integer> tree = new RBTree<>(arr);
+        final RBTree<Integer> tree = new RBTree<>(Integer::compare, arr);
+        
         assertNotNull(tree.getRoot());
+        
         assertEquals((Object) tree.getMin(), min);
+        assertNull(tree.prev(tree.getMin()));
+        assertNotNull(tree.next(tree.getMin()));
+        
         assertEquals((Object) tree.getMax(), max);
+        assertNull(tree.next(tree.getMax()));
+        assertNotNull(tree.prev(tree.getMax()));
     }
 
     @Test
@@ -514,34 +549,61 @@ public class RBTreeTest
             max = (arr[i].i > max.i ? arr[i] : max);
         }
         ArrayTools.shuffle(arr);
-        final LinkedRBTree<Key> tree = new LinkedRBTree<>(arr);
+        final LinkedRBTree<Key> tree = new LinkedRBTree<>(Key.COMPARATOR, Arrays.asList(arr));
+        
         final Key root = tree.getRoot();
         assertNotNull(root);
         assertTrue(root.isRoot());
         
         for (Key key : arr) {
             assertEquals(key.isRoot(), key.equals(root));
+            if (key.equals(root)) {
+                assertFalse(key.hasParent());
+                assertNull(key.parent());
+                assertNull(key.getNode().getGrandParent());
+                
+            } else {
+                assertTrue(key.hasParent());
+                assertNotNull(key.getNode().getParent());
+                if (key.parent().equals(root)) {
+                    assertNull(key.getNode().getGrandParent());
+                } else {
+                    assertNotNull(key.getNode().getGrandParent());
+                }
+            }
             
             if (key.equals(min)) {
                 assertEquals(key, tree.getMin());
                 assertFalse(key.hasPrev());
                 assertNull(key.prev());
+                assertNull(tree.prev(key));
+                assertEquals(key.hasRight(), !key.isLeaf());
                 
             } else {
                 assertNotEquals(key, tree.getMin());
                 assertTrue(key.hasPrev());
                 assertNotNull(key.prev());
+                assertNotNull(tree.prev(key));
             }
             
             if (key.equals(max)) {
                 assertEquals(key, tree.getMax());
                 assertFalse(key.hasNext());
                 assertNull(key.next());
+                assertNull(tree.next(key));
+                assertEquals(key.hasLeft(), !key.isLeaf());
                 
             } else {
                 assertNotEquals(key, tree.getMax());
                 assertTrue(key.hasNext());
                 assertNotNull(key.next());
+                assertNotNull(tree.next(key));
+            }
+            
+            if (!key.hasLeft() && !key.hasRight()) {
+                assertTrue(key.isLeaf());
+            } else {
+                assertFalse(key.isLeaf());
             }
         }
     }
@@ -555,31 +617,165 @@ public class RBTreeTest
         }
         
         ArrayTools.shuffle(arr);
-        RBTree<Integer> tree = new RBTree<>(arr);
+        RBTree<Integer> tree = new RBTree<>(Integer::compare, arr);
         
         runAndWait(() -> {
-            int target = arr[ThreadLocalRandom.current().nextInt(arr.length)];
-            int resultSearch = tree.search((cur, left, right) -> {
-                if (cur == target) {
-                    return RBSearch.Choice.CURRENT;
-                } else if (target < cur) {
+            final int target = arr[ThreadLocalRandom.current().nextInt(arr.length)];
+            final Integer resultSearch = tree.search((comparator, cur, left, right) -> {
+                if (cur == null) return null;
+                int cmp = comparator.compare(target, cur);
+                if (cmp < 0) {
                     return RBSearch.Choice.GO_LEFT;
-                } else {
+                } else if (cmp > 0) {
                     return RBSearch.Choice.GO_RIGHT;
+                } else {
+                    return RBSearch.Choice.CURRENT;
+                }
+            });
+            assertEquals((Integer) target, resultSearch);
+            
+            final Integer resultBinary0 = tree.binarySearch(target);
+            assertEquals((Integer) target, resultBinary0);
+            
+            final Integer resultBinary1 = tree.binarySearch(new IntKey(target));
+            assertEquals((Integer) target, resultBinary1);
+            
+        }, 64, 5000);
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void search1() {
+        final int amt = 100_000;
+        final Key[] arr = new Key[amt];
+        for (int i = 0; i < amt; i++) {
+            arr[i] = new Key(4 * i + 6, 0);
+        }
+
+        ArrayTools.shuffle(arr);
+        LinkedRBTree<Key> tree = new LinkedRBTree<>(Key.COMPARATOR, arr);
+
+        runAndWait(() -> {
+            final Key target = arr[ThreadLocalRandom.current().nextInt(arr.length)];
+            final Key resultSearch = tree.search((comparator, cur, left, right) -> {
+                if (cur == null) return null;
+                int cmp = comparator.compare(target, cur);
+                if (cmp < 0) {
+                    return RBSearch.Choice.GO_LEFT;
+                } else if (cmp > 0) {
+                    return RBSearch.Choice.GO_RIGHT;
+                } else {
+                    return RBSearch.Choice.CURRENT;
                 }
             });
             assertEquals(target, resultSearch);
-            
-            int resultBinary0 = tree.binarySearch(target);
+
+            final Key resultBinary0 = tree.binarySearch(target);
             assertEquals(target, resultBinary0);
-            
-            int resultBinary1 = tree.binarySearch(new IntKey(target));
+
+            final Key resultBinary1 = tree.binarySearch(new KeyKey(target));
             assertEquals(target, resultBinary1);
-            
+
         }, 64, 5000);
-        
-        
     }
+    
+    @Test
+    public void listIterator0() {
+        final int amt = 100_000;
+        final Key[] arr = new Key[amt];
+        Key min = new Key(Integer.MAX_VALUE, 0);
+        Key max = new Key(Integer.MIN_VALUE, 0);
+        for (int i = 0; i < amt; i++) {
+            arr[i] = new Key(4 * i + 6, 0);
+            min = (arr[i].i < min.i ? arr[i] : min);
+            max = (arr[i].i > max.i ? arr[i] : max);
+        }
+        Key[] order = new Key[amt];
+        System.arraycopy(arr, 0, order, 0, amt);
+        ArrayTools.shuffle(arr);
+        final LinkedRBTree<Key> tree = new LinkedRBTree<>(Key.COMPARATOR, Arrays.asList(arr));
+
+        {
+            ListIterator<Key> it = tree.listIterator(true);
+            int i;
+            for (i = 0; i < order.length && it.hasNext(); i++) {
+                assertEquals(order[i], it.next());
+            }
+            if (i != order.length) {
+                fail("Not all items were processed!");
+            }
+            if (it.hasNext()) {
+                fail("Too many items remaining!");
+            }
+        }
+
+        {
+            ListIterator<Key> it = tree.listIterator(false);
+            int i;
+            for (i = order.length - 1; i >= 0 && it.hasPrevious(); i--) {
+                assertEquals(order[i], it.previous());
+            }
+            if (i != -1) {
+                fail("Not all items were processed!");
+            }
+            if (it.hasPrevious()) {
+                fail("Too many items remaining!");
+            }
+        }
+    }
+    
+    @Test
+    public void listIteratorToArray() {
+        final int amt = 100_000;
+        final Key[] arr = new Key[amt];
+        for (int i = 0; i < amt; i++) {
+            arr[i] = new Key(4 * i + 6, 0);
+        }
+        Key[] orderExp = new Key[amt];
+        System.arraycopy(arr, 0, orderExp, 0, amt);
+        ArrayTools.shuffle(arr);
+        LinkedRBTree<Key> tree = new LinkedRBTree<>(Key.COMPARATOR, arr);
+        
+        Object[] order0 = tree.toArray();
+        Key[] order1 = tree.toArray(new Key[0]);
+        
+        assertEquals(order0.length, orderExp.length);
+        assertEquals(order1.length, orderExp.length);
+        
+        for (int i = 0; i < amt; i++) {
+            assertEquals(orderExp[i], order0[i]);
+            assertEquals(orderExp[i], order1[i]);
+        }
+    }
+    
+    @Test
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    public void toStringTest() {
+        final int amt = 100_000;
+        final Key[] arr = new Key[amt];
+        for (int i = 0; i < amt; i++) {
+            arr[i] = new Key(4 * i + 6, 0);
+        }
+        ArrayTools.shuffle(arr);
+        LinkedRBTree<Key> tree1 = new LinkedRBTree<>(Key.COMPARATOR, arr);
+        tree1.toString();
+        tree1.debug();
+        RBTree<Key> tree2 = new RBTree<>(Key.COMPARATOR, arr);
+        tree2.toString();
+        tree2.debug();
+    }
+    
+    // TODO:
+    // removeAll(Collection)
+    // prev(D)
+    // addAll(Collection) # non-empty
+    // retainAll(Collection) # set, remove case
+    // Queue functions
+    // listIterator.nextIndex()
+    // listIterator.previousIndex()
+    // listIterator.remove()
+    // listIterator.set()
+    // listIterator.add()
     
     
 }

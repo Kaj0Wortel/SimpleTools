@@ -84,56 +84,56 @@ public class LinkedRBNode<D extends LinkedRBKey<D>>
     /**
      * @param next The new next node of this node.
      */
-    protected void setNext(LinkedRBNode<D> next) {
+    protected final void setNext(LinkedRBNode<D> next) {
         this.next = next;
     }
     
     /**
      * @param prev The new previous node of this node.
      */
-    protected void setPrev(LinkedRBNode<D> prev) {
+    protected final void setPrev(LinkedRBNode<D> prev) {
         this.prev = prev;
     }
     
     /**
      * @return The next node of this node.
      */
-    public LinkedRBNode<D> getNext() {
+    public final LinkedRBNode<D> getNext() {
         return next;
     }
     
     /**
      * @return The previous node of this node.
      */
-    public LinkedRBNode<D> getPrev() {
+    public final LinkedRBNode<D> getPrev() {
         return prev;
     }
     
     /**
      * @return {@code true} if this node has a next node. {@code false} otherwise.
      */
-    public boolean hasNext() {
+    public final boolean hasNext() {
         return next != null;
     }
     
     /**
      * @return {@code true} if this node has a previous node. {@code false} otherwise.
      */
-    public boolean hasPrev() {
+    public final boolean hasPrev() {
         return prev != null;
     }
     
     /**
      * @return The data of the next node, or {@code null} if there is no next node.
      */
-    public D getNextData() {
+    public final D getNextData() {
         return (next == null ? null : next.getData());
     }
     
     /**
      * @return The data of the previous node, or {@code null} if there is no previous node.
      */
-    public D getPrevData() {
+    public final D getPrevData() {
         return (prev == null ? null : prev.getData());
     }
     

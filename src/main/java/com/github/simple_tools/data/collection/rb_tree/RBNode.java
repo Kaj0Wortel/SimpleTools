@@ -18,8 +18,6 @@ package com.github.simple_tools.data.collection.rb_tree;
 
 import lombok.NonNull;
 
-import java.util.Objects;
-
 /**
  * This class stores the information about the node in the {@link RBTree} data structure.
  * The value of this node is calculated from the given object.
@@ -28,9 +26,7 @@ import java.util.Objects;
  * 
  * @see RBTree
  */
-@SuppressWarnings("unused")
-public class RBNode<D extends Comparable<D>>
-        implements Comparable<RBNode<D>> {
+public class RBNode<D> {
      
     /* ------------------------------------------------------------------------
      * Variables.
@@ -48,7 +44,7 @@ public class RBNode<D extends Comparable<D>>
     /** The size of the subtree. */
     private int size = 1;
     /** The data element of this node. */
-    private D data;
+    final private D data;
     
     
     /* ------------------------------------------------------------------------
@@ -72,7 +68,7 @@ public class RBNode<D extends Comparable<D>>
     /**
      * @param color The new color of the node.
      */
-    protected void setColor(RBColor color) {
+    protected final void setColor(RBColor color) {
         this.color = color;
     }
     
@@ -86,7 +82,7 @@ public class RBNode<D extends Comparable<D>>
     /**
      * @param parent The new parent of this node.
      */
-    protected void setParent(RBNode<D> parent) {
+    protected final void setParent(RBNode<D> parent) {
         this.parent = parent;
     }
     
@@ -100,7 +96,7 @@ public class RBNode<D extends Comparable<D>>
     /**
      * @param left The new left child of this node.
      */
-    protected void setLeft(RBNode<D> left) {
+    protected final void setLeft(RBNode<D> left) {
         this.left = left;
     }
     
@@ -114,7 +110,7 @@ public class RBNode<D extends Comparable<D>>
     /**
      * @param right The new right child of this node.
      */
-    protected void setRight(RBNode<D> right) {
+    protected final void setRight(RBNode<D> right) {
         this.right = right;
     }
     
@@ -128,28 +124,21 @@ public class RBNode<D extends Comparable<D>>
     /**
      * @return The size of the subtree rooted at this node.
      */
-    public int size() {
+    public final int size() {
         return size;
     }
     
     /**
      * @param size The new size of the subtree routed at this node.
      */
-    public void setSize(int size) {
+    public final void setSize(int size) {
         this.size = size;
-    }
-    
-    /**
-     * @param data The new data of this node.
-     */
-    public void setData(D data) {
-        this.data = data;
     }
     
     /**
      * @return The data of this node.
      */
-    public D getData() {
+    public final D getData() {
         return data;
     }
     
@@ -259,13 +248,6 @@ public class RBNode<D extends Comparable<D>>
     }
     
     @Override
-    public int compareTo(RBNode<D> node) {
-        int eq = data.compareTo(node.data);
-        if (eq != 0) return eq;
-        return data.hashCode() - node.data.hashCode();
-    }
-    
-    @Override
     public String toString() {
         return "Node[" + System.lineSeparator() +
                 "  this  : " + data + System.lineSeparator() + 
@@ -275,26 +257,6 @@ public class RBNode<D extends Comparable<D>>
                 "  right : " + (!hasRight() ? "null" : right.data) + System.lineSeparator() +
                 "  size  : " + size + System.lineSeparator() +
                 "]";
-    }
-    
-    @Override
-    public int hashCode() {
-        return data.hashCode();
-    }
-    
-    @Override
-    @SuppressWarnings("unchecked")
-    public boolean equals(Object obj) {
-        if (obj == null) return false;
-        if (obj instanceof RBNode) {
-            RBNode<?> node = (RBNode<?>) obj;
-            return Objects.equals(node.data, data);
-            
-        } else if (obj instanceof Comparable) {
-            Comparable<D> cmp = (Comparable<D>) obj;
-            return cmp.compareTo(data) == 0;
-        }
-        return false;
     }
     
     

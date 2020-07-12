@@ -16,6 +16,8 @@
 
 package com.github.simple_tools.data.collection.rb_tree;
 
+import java.util.Comparator;
+
 /**
  * This key class is used for the {@link LinkedRBTree} data structure.
  * The user of this data structure should extends this class. <br>
@@ -28,11 +30,8 @@ package com.github.simple_tools.data.collection.rb_tree;
  * @see LinkedRBNode
  * @see LinkedRBTree
  */
-@SuppressWarnings("unused")
-public abstract class LinkedRBKey<D extends LinkedRBKey<D>>
-        implements Comparable<D> {
+public abstract class LinkedRBKey<D extends LinkedRBKey<D>> {
     
-     
     /* ------------------------------------------------------------------------
      * Variables.
      * ------------------------------------------------------------------------
@@ -167,12 +166,6 @@ public abstract class LinkedRBKey<D extends LinkedRBKey<D>>
     public boolean isLeaf() {
         return node != null && !node.hasChild();
     }
-    
-    @Override
-    public abstract boolean equals(Object obj);
-    
-    @Override
-    public abstract int hashCode();
     
     
 }
