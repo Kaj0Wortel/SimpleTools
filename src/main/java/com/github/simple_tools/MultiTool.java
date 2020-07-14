@@ -37,8 +37,9 @@ public final class MultiTool {
         if (radix <= 2) length = 8;
         else if (radix <= 3) length = 6;
         else if (radix <= 6) length = 4;
-        else length = 3;
-        return"0".repeat(length - text.length()) + text;
+        else if (radix <= 15) length = 3;
+        else length = 2;
+        return "0".repeat(length - text.length()) + text;
     }
 
     public static String toFilledString(short s, int radix) {
@@ -52,7 +53,7 @@ public final class MultiTool {
         else if (radix <= 9) length = 6;
         else if (radix <= 15) length = 5;
         else length = 4;
-        return"0".repeat(length - text.length()) + text;
+        return "0".repeat(length - text.length()) + text;
     }
     
     public static String toFilledString(char c, int radix) {
@@ -74,7 +75,11 @@ public final class MultiTool {
         else if (radix <= 15) length = 9;
         else if (radix <= 23) length = 8;
         else length = 7;
-        return"0".repeat(length - text.length()) + text;
+        
+        if (text.startsWith("-"))
+            return "-" + "0".repeat(length - text.length() + 1) + text.substring(1);
+        else
+            return " " + "0".repeat(length - text.length()) + text;
     }
 
     public static String toFilledString(long l, int radix) {
@@ -97,9 +102,12 @@ public final class MultiTool {
         else if (radix <= 23) length = 15;
         else if (radix <= 30) length = 14;
         else length = 13;
-        return"0".repeat(length - text.length()) + text;
+        
+        if (text.startsWith("-"))
+            return "-" + "0".repeat(length - text.length() + 1) + text.substring(1);
+        else
+            return " " + "0".repeat(length - text.length()) + text;
     }
-    
     
     
 }

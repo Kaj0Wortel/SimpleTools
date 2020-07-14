@@ -47,7 +47,7 @@ import com.github.simple_tools.data.collection.rb_tree.RBSearch.Choice;
  */
 public class RBTree<D>
         extends AbstractCollection<D>
-        implements Collection<D>, Queue<D> {
+        implements Queue<D>, Set<D> {
 
     /* ------------------------------------------------------------------------
      * Constants.
@@ -1199,13 +1199,6 @@ public class RBTree<D>
         }
         return sb.toString();
     }
-    
-//    public static void main(String[] args) {
-//        RBTree<Integer> tree = new RBTree<>(List.of(
-//                1, 2, 3, 4, 5, 6, 7
-//        ));
-//        System.out.println(tree.debug());
-//    }
     
     
 }

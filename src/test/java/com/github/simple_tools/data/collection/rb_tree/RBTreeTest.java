@@ -22,9 +22,10 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import com.github.simple_tools.AbstractTest;
 import com.github.simple_tools.data.array.ArrayTools;
-import lombok.AllArgsConstructor;
-import org.junit.Test;
 
+import lombok.AllArgsConstructor;
+
+import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
@@ -46,7 +47,7 @@ public class RBTreeTest
     @AllArgsConstructor
     private static class Key
             extends LinkedRBKey<Key> {
-        public static final Comparator<Key> COMPARATOR = Comparator.comparingInt(k -> k.i);;
+        public static final Comparator<Key> COMPARATOR = Comparator.comparingInt(k -> k.i);
         private final int i;
         private final int j;
         
@@ -765,12 +766,57 @@ public class RBTreeTest
         tree2.debug();
     }
     
+    @Test
+    public void queueTest() {
+        Integer[] add = new Integer[] {1, 2, 5, 6, 7, 8, 12, 12};
+        RBTree<Integer> tree = new RBTree<>(Integer::compareTo);
+
+        expEx(NoSuchElementException.class, tree::element);
+        expEx(NoSuchElementException.class, tree::remove);
+        assertNull(tree.peek());
+        assertNull(tree.poll());
+        
+        Integer min = null;
+        Set<Integer> added = new HashSet<>();
+        for (int i : add) {
+            assertEquals(min, tree.peek());
+            assertEquals(added.add(i), tree.offer(i));
+            min = Math.min((min == null ? Integer.MAX_VALUE : min), i);
+            assertEquals(min, tree.peek());
+        }
+        
+        RBTree<Integer> tree2 = new RBTree<>(Integer::compareTo, tree);
+        
+        while (!tree.isEmpty()) {
+            Integer val = tree.element();
+            assertNotNull(val);
+            assertEquals(val, tree.getMin());
+            assertEquals(val, tree.remove());
+        }
+        
+        expEx(NoSuchElementException.class, tree::element);
+        expEx(NoSuchElementException.class, tree::remove);
+        assertNull(tree.peek());
+        assertNull(tree.poll());
+        
+        while (!tree2.isEmpty()) {
+            Integer val = tree2.peek();
+            assertNotNull(val);
+            assertEquals(val, tree2.getMin());
+            assertEquals(val, tree2.poll());
+        }
+
+        expEx(NoSuchElementException.class, tree2::element);
+        expEx(NoSuchElementException.class, tree2::remove);
+        assertNull(tree2.peek());
+        assertNull(tree2.poll());
+    }
+    
     // TODO:
     // removeAll(Collection)
     // prev(D)
     // addAll(Collection) # non-empty
     // retainAll(Collection) # set, remove case
-    // Queue functions
     // listIterator.nextIndex()
     // listIterator.previousIndex()
     // listIterator.remove()

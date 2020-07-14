@@ -45,10 +45,6 @@ public class SimpleLinkedRBKey<V>
      * Functions.
      * ------------------------------------------------------------------------
      */
-    public static <D, K extends SimpleLinkedRBKey<D>> Comparator<K> wrap(Comparator<D> comparator) {
-        return (k1, k2) -> comparator.compare(k1.getValue(), k2.getValue());
-    }
-    
     @Override
     public String toString() {
         return Objects.toString(value);

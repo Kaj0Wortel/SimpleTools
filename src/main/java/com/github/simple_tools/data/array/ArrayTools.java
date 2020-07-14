@@ -173,9 +173,9 @@ public final class ArrayTools {
      * 
      * @return A string representation of the given array.
      */
-    public static String toDeepString(Object array) {
+    public static String deepToString(Object array) {
         StringBuilder sb = new StringBuilder();
-        toDeepString(sb, array);
+        deepToString(sb, array);
         return sb.toString();
     }
     
@@ -185,7 +185,7 @@ public final class ArrayTools {
      * @param sb The builder to output the generated string to.
      * @param array The array to create the representation of.
      */
-    private static void toDeepString(StringBuilder sb, Object array) {
+    public static void deepToString(StringBuilder sb, Object array) {
         if (array instanceof Object[]) {
             Object[] arr = (Object[]) array;
             sb.append("[");
@@ -193,7 +193,7 @@ public final class ArrayTools {
             for (Object obj : arr) {
                 if (first) first = false;
                 else sb.append(", ");
-                toDeepString(sb, obj);
+                deepToString(sb, obj);
             }
             sb.append("]");
             
@@ -295,12 +295,12 @@ public final class ArrayTools {
     
     /**
      * Converts the given integer typed number array to a string representation
-     * in base {@code radix}. <br>
-     * This means that the types {@code byte}, {@code short}, {@code char},
-     * {@code int}, {@code long}, their class equivalents, and custom types
-     * extending {@link Number} are allowed. <br>
-     * Floating point numbers ({@code float} and {@code double} are INVALID,
-     * as well as classes not extending {@link Number}.
+     * in base {@code radix}. Additionally adds extra zeroes at the front to
+     * neatly align the numbers. <br>
+     * Notice that only types {@code byte}, {@code char}, {@code short}, {@code int},
+     * {@code long}, and their class equivalents are allowed. <br>
+     * The floating point numbers ({@code float} and {@code double} are <b>NOT</b> allowed. <br>
+     * Supports multi-dimensional arrays.
      * 
      * @param array The integer typed array to print.
      * @param radix The radix of the values.
@@ -312,10 +312,10 @@ public final class ArrayTools {
      * @see Integer#toString(int, int)
      * @see Long#toString(long, int)
      */
-    public static String toDeepString(Object array, int radix)
+    public static String deepToString(Object array, int radix)
             throws IllegalArgumentException {
         StringBuilder sb = new StringBuilder();
-        toDeepString(sb, array, radix);
+        deepToString(sb, array, radix);
         return sb.toString();
     }
     
@@ -328,187 +328,324 @@ public final class ArrayTools {
      * 
      * @throws IllegalArgumentException If the given object has the wrong type.
      * 
-     * @see #toDeepString(Object, int)
+     * @see #deepToString(Object, int)
      */
-    public static void toDeepString(StringBuilder sb, Object array, int radix)
+    public static void deepToString(StringBuilder sb, Object array, int radix)
             throws IllegalArgumentException {
         if (array instanceof Object[]) {
-            if (!(array instanceof Number[])) {
-                throw new IllegalArgumentException("Argument is not a number array!");
-                
-            } else if (array instanceof Float[]) {
-                throw new IllegalArgumentException(
-                        "Expected an integer typed number array, "
-                                + "but found a floating point array (Float[]).");
-                
-            } else if (array instanceof Double[]) {
-                throw new IllegalArgumentException(
-                        "Expected an integer typed number array, "
-                                + "but found a floating point array (Double[]).");
-                
-            } else {
+            if (array instanceof Byte[])
+                deepToString(sb, (Byte[]) array, radix);
+            else if (array instanceof Character[])
+                deepToString(sb, (Character[]) array, radix);
+            else if (array instanceof Short[])
+                deepToString(sb, (Short[]) array, radix);
+            else if (array instanceof Integer[])
+                deepToString(sb, (Integer[]) array, radix);
+            else if (array instanceof Long[])
+                deepToString(sb, (Long[]) array, radix);
+            else if (array.getClass().getComponentType().isArray()) {
                 sb.append("[");
-                Number[] arr = (Number[]) array;
                 boolean first = true;
-                for (Number num : arr) {
+                for (Object arr : (Object[]) array) {
                     if (first) first = false;
                     else sb.append(", ");
-                    toDeepString(sb, num, radix);
+                    deepToString(sb, arr, radix);
                 }
                 sb.append("]");
+                
+            } else {
+                throw new IllegalArgumentException("Type not supported: "
+                        + array.getClass().getComponentType());
             }
-            
-        } else if (array instanceof byte[]) {
-            sb.append("[");
-            byte[] arr = (byte[]) array;
-            boolean first = true;
-            for (byte b : arr) {
-                if (first) first = false;
-                else sb.append(", ");
-                sb.append(MultiTool.toFilledString(b, radix));
-            }
-            sb.append("]");
-            
-        } else if (array instanceof char[]) {
-            sb.append("[");
-            char[] arr = (char[]) array;
-            boolean first = true;
-            for (char c : arr) {
-                if (first) first = false;
-                else sb.append(", ");
-                sb.append(MultiTool.toFilledString(c, radix));
-            }
-            sb.append("]");
-            
-        } else if (array instanceof short[]) {
-            sb.append("[");
-            short[] arr = (short[]) array;
-            boolean first = true;
-            for (short s : arr) {
-                if (first) first = false;
-                else sb.append(", ");
-                sb.append(MultiTool.toFilledString(s, radix));
-            }
-            sb.append("]");
-            
-        } else if (array instanceof int[]) {
-            sb.append("[");
-            int[] arr = (int[]) array;
-            boolean first = true;
-            for (int i : arr) {
-                if (first) first = false;
-                else sb.append(", ");
-                sb.append(MultiTool.toFilledString(i, radix));
-            }
-            sb.append("]");
-            
-        } else if (array instanceof long[]) {
-            sb.append("[");
-            long[] arr = (long[]) array;
-            boolean first = true;
-            for (long l : arr) {
-                if (first) first = false;
-                else sb.append(", ");
-                sb.append(MultiTool.toFilledString(l, radix));
-            }
-            sb.append("]");
             
         } else if (array == null) {
             sb.append("null");
             
-        } else if (array instanceof boolean[]) {
-            throw new IllegalArgumentException(
-                    "Expected an integer typed number array, "
-                            + "but found a boolean array (boolean[]).");
-            
-        } else if (array instanceof float[]) {
-            throw new IllegalArgumentException(
-                    "Expected an integer typed number array, "
-                            + "but found a floating point array (float[]).");
-            
-        } else if (array instanceof double[]) {
-            throw new IllegalArgumentException(
-                    "Expected an integer typed number array, "
-                            + "but found a floating point array (double[]).");
+        } else if (array.getClass().getComponentType().isPrimitive()) {
+            if (array instanceof byte[])
+                deepToString(sb, (byte[]) array, radix);
+            else if (array instanceof char[])
+                deepToString(sb, (char[]) array, radix);
+            else if (array instanceof short[])
+                deepToString(sb, (short[]) array, radix);
+            else if (array instanceof int[])
+                deepToString(sb, (int[]) array, radix);
+            else if (array instanceof long[])
+                deepToString(sb, (long[]) array, radix);
+            else {
+                throw new IllegalArgumentException("Type not supported: "
+                        + array.getClass().getComponentType());
+            }
             
         } else { // {@code array} is not an array.
-            if (array instanceof Byte) {
+            if (array instanceof Byte)
                 sb.append(MultiTool.toFilledString((byte) array, radix));
-                
-            } else if (array instanceof Short) {
+            else if (array instanceof Character)
+                sb.append(MultiTool.toFilledString((char) array, radix));
+            else if (array instanceof Short)
                 sb.append(MultiTool.toFilledString((short) array, radix));
-                
-            } else if (array instanceof Integer) {
+            else if (array instanceof Integer)
                 sb.append(MultiTool.toFilledString((int) array, radix));
-                
-            } else if (array instanceof Long) {
+            else if (array instanceof Long)
                 sb.append(MultiTool.toFilledString((long) array, radix));
-                
-            } else {
-                throw new IllegalArgumentException(
-                        "Expected an integer typed number, but found: " + array);
+            else {
+                throw new IllegalArgumentException("Type not supported: "
+                        + array.getClass().getComponentType());
             }
         }
     }
-    
+
     /**
-     * Creates a deep string representation of the given array.
-     * 
-     * @param array The array to convert.
-     * 
-     * @return A deep string representation of {@code array}.
+     * Converts a byte array to a string representation using the given radix.
+     * The output is written to the provided {@link StringBuilder}.
+     * The numbers are assumed to be unsigned.
+     *
+     * @param sb The string builder to store the result in.
+     * @param arr The array to process.
+     * @param radix The radix used.
+     *
+     * @throws IllegalArgumentException If the given object has the wrong type.
+     *
+     * @see #deepToString(StringBuilder, Object, int)
      */
-    public static String deepToString(Object array) {
-        if (array instanceof Object[]) return Arrays.deepToString((Object[]) array);
-        return toDeepString(array);
-    }
-    
-    /**
-     * Creates a deep string representation of the given array containing numbers,
-     * and converts all numbers with the given radix.
-     * 
-     * @param array The array to convert.
-     * @param radix The radix of the values.
-     * 
-     * @return A deep string representation of {@code array} using the given radix.
-     * 
-     * @see Arrays#deepToString(Object[])
-     */
-    public static String deepToString(Object array, int radix) {
-        StringBuilder sb = new StringBuilder();
-        deepToString(array, radix, sb);
-        return sb.toString();
-    }
-    
-    /**
-     * Creates a deep string representation of the given array containing numbers,
-     * and converts all numbers with the given radix. <br>
-     * This function is invoked recursively to determine the end result.
-     * 
-     * @param array The array to convert.
-     * @param radix The radix of the values.
-     * @param sb    The string builder used to store the result.
-     */
-    private static void deepToString(Object array, int radix, StringBuilder sb) {
-        if (array == null) {
-            sb.append("null");
-            return;
-        }
-        if (!array.getClass().isArray()) {
-            throw new IllegalArgumentException("Argument is not an array!");
-        }
-        if (!array.getClass().getComponentType().isArray()) {
-            sb.append(toDeepString(array, radix));
-            return;
-        }
-        
+    public static void deepToString(StringBuilder sb, byte[] arr, int radix)
+            throws IllegalArgumentException {
         sb.append("[");
-        Object[] arr = (Object[]) array;
         boolean first = true;
-        for (Object o : arr) {
+        for (byte b : arr) {
             if (first) first = false;
             else sb.append(", ");
-            deepToString(o, radix, sb);
+            sb.append(MultiTool.toFilledString(b, radix));
+        }
+        sb.append("]");
+    }
+    
+    /**
+     * Converts a char array to a string representation using the given radix.
+     * The output is written to the provided {@link StringBuilder}.
+     * The numbers are assumed to be unsigned.
+     *
+     * @param sb The string builder to store the result in.
+     * @param arr The array to process.
+     * @param radix The radix used.
+     *
+     * @throws IllegalArgumentException If the given object has the wrong type.
+     *
+     * @see #deepToString(StringBuilder, Object, int)
+     */
+    public static void deepToString(StringBuilder sb, char[] arr, int radix)
+            throws IllegalArgumentException {
+        sb.append("[");
+        boolean first = true;
+        for (char c : arr) {
+            if (first) first = false;
+            else sb.append(", ");
+            sb.append(MultiTool.toFilledString(c, radix));
+        }
+        sb.append("]");
+    }
+
+    /**
+     * Converts a short array to a string representation using the given radix.
+     * The output is written to the provided {@link StringBuilder}.
+     *
+     * @param sb The string builder to store the result in.
+     * @param arr The array to process.
+     * @param radix The radix used.
+     * The numbers are assumed to be unsigned.
+     *
+     * @throws IllegalArgumentException If the given object has the wrong type.
+     *
+     * @see #deepToString(StringBuilder, Object, int)
+     */
+    public static void deepToString(StringBuilder sb, short[] arr, int radix)
+            throws IllegalArgumentException {
+        sb.append("[");
+        boolean first = true;
+        for (short s : arr) {
+            if (first) first = false;
+            else sb.append(", ");
+            sb.append(MultiTool.toFilledString(s, radix));
+        }
+        sb.append("]");
+    }
+
+    /**
+     * Converts an int array to a string representation using the given radix.
+     * The output is written to the provided {@link StringBuilder}.
+     * The numbers are assumed to be signed 2-complement numbers.
+     *
+     * @param sb The string builder to store the result in.
+     * @param arr The array to process.
+     * @param radix The radix used.
+     *
+     * @throws IllegalArgumentException If the given object has the wrong type.
+     *
+     * @see #deepToString(StringBuilder, Object, int)
+     */
+    public static void deepToString(StringBuilder sb, int[] arr, int radix)
+            throws IllegalArgumentException {
+        sb.append("[");
+        boolean first = true;
+        for (int i : arr) {
+            if (first) first = false;
+            else sb.append(", ");
+            sb.append(MultiTool.toFilledString(i, radix));
+        }
+        sb.append("]");
+    }
+
+    /**
+     * Converts a long array to a string representation using the given radix.
+     * The output is written to the provided {@link StringBuilder}.
+     * The numbers are assumed to be signed 2-complement numbers.
+     *
+     * @param sb The string builder to store the result in.
+     * @param arr The array to process.
+     * @param radix The radix used.
+     *
+     * @throws IllegalArgumentException If the given object has the wrong type.
+     *
+     * @see #deepToString(StringBuilder, Object, int)
+     */
+    public static void deepToString(StringBuilder sb, long[] arr, int radix)
+            throws IllegalArgumentException {
+        sb.append("[");
+        boolean first = true;
+        for (long l : arr) {
+            if (first) first = false;
+            else sb.append(", ");
+            sb.append(MultiTool.toFilledString(l, radix));
+        }
+        sb.append("]");
+    }
+
+    /**
+     * Converts a Byte array to a string representation using the given radix.
+     * The output is written to the provided {@link StringBuilder}.
+     * The numbers are assumed to be unsigned.
+     *
+     * @param sb The string builder to store the result in.
+     * @param arr The array to process.
+     * @param radix The radix used.
+     *
+     * @throws IllegalArgumentException If the given object has the wrong type.
+     *
+     * @see #deepToString(StringBuilder, Object, int)
+     */
+    public static void deepToString(StringBuilder sb, Byte[] arr, int radix)
+            throws IllegalArgumentException {
+        sb.append("[");
+        boolean first = true;
+        for (Byte b : arr) {
+            if (first) first = false;
+            else sb.append(", ");
+            if (b == null) sb.append("null");
+            else sb.append(MultiTool.toFilledString(b, radix));
+        }
+        sb.append("]");
+    }
+
+    /**
+     * Converts a Character array to a string representation using the given radix.
+     * The output is written to the provided {@link StringBuilder}.
+     * The numbers are assumed to be unsigned.
+     *
+     * @param sb The string builder to store the result in.
+     * @param arr The array to process.
+     * @param radix The radix used.
+     *
+     * @throws IllegalArgumentException If the given object has the wrong type.
+     *
+     * @see #deepToString(StringBuilder, Object, int)
+     */
+    public static void deepToString(StringBuilder sb, Character[] arr, int radix)
+            throws IllegalArgumentException {
+        sb.append("[");
+        boolean first = true;
+        for (Character c : arr) {
+            if (first) first = false;
+            else sb.append(", ");
+            if (c == null) sb.append("null");
+            else sb.append(MultiTool.toFilledString(c, radix));
+        }
+        sb.append("]");
+    }
+
+    /**
+     * Converts a Short array to a string representation using the given radix.
+     * The output is written to the provided {@link StringBuilder}.
+     * The numbers are assumed to be unsigned.
+     *
+     * @param sb The string builder to store the result in.
+     * @param arr The array to process.
+     * @param radix The radix used.
+     *
+     * @throws IllegalArgumentException If the given object has the wrong type.
+     *
+     * @see #deepToString(StringBuilder, Object, int)
+     */
+    public static void deepToString(StringBuilder sb, Short[] arr, int radix)
+            throws IllegalArgumentException {
+        sb.append("[");
+        boolean first = true;
+        for (Short s : arr) {
+            if (first) first = false;
+            else sb.append(", ");
+            if (s == null) sb.append("null");
+            else sb.append(MultiTool.toFilledString(s, radix));
+        }
+        sb.append("]");
+    }
+
+    /**
+     * Converts an Integer array to a string representation using the given radix.
+     * The output is written to the provided {@link StringBuilder}.
+     * The numbers are assumed to be signed 2-complement numbers.
+     *
+     * @param sb The string builder to store the result in.
+     * @param arr The array to process.
+     * @param radix The radix used.
+     *
+     * @throws IllegalArgumentException If the given object has the wrong type.
+     *
+     * @see #deepToString(StringBuilder, Object, int)
+     */
+    public static void deepToString(StringBuilder sb, Integer[] arr, int radix)
+            throws IllegalArgumentException {
+        sb.append("[");
+        boolean first = true;
+        for (Integer i : arr) {
+            if (first) first = false;
+            else sb.append(", ");
+            if (i == null) sb.append("null");
+            else sb.append(MultiTool.toFilledString(i, radix));
+        }
+        sb.append("]");
+    }
+
+    /**
+     * Converts a Long array to a string representation using the given radix.
+     * The output is written to the provided {@link StringBuilder}.
+     * The numbers are assumed to be signed 2-complement numbers.
+     *
+     * @param sb The string builder to store the result in.
+     * @param arr The array to process.
+     * @param radix The radix used.
+     *
+     * @throws IllegalArgumentException If the given object has the wrong type.
+     *
+     * @see #deepToString(StringBuilder, Object, int)
+     */
+    public static void deepToString(StringBuilder sb, Long[] arr, int radix)
+            throws IllegalArgumentException {
+        sb.append("[");
+        boolean first = true;
+        for (Long l : arr) {
+            if (first) first = false;
+            else sb.append(", ");
+            if (l == null) sb.append("null");
+            else sb.append(MultiTool.toFilledString(l, radix));
         }
         sb.append("]");
     }
@@ -531,21 +668,29 @@ public final class ArrayTools {
      */
     public static int length(Object array)
             throws IllegalArgumentException {
-        if (array instanceof Object[]) return ((Object[]) array).length;
-        else if (array instanceof boolean[]) return ((boolean[]) array).length;
-        else if (array instanceof byte[]) return ((byte[]) array).length;
-        else if (array instanceof char[]) return ((char[]) array).length;
-        else if (array instanceof short[]) return ((short[]) array).length;
-        else if (array instanceof int[]) return ((int[]) array).length;
-        else if (array instanceof long[]) return ((long[]) array).length;
-        else if (array instanceof float[]) return ((float[]) array).length;
-        else if (array instanceof double[]) return ((double[]) array).length;
+        if (array instanceof Object[])
+            return ((Object[]) array).length;
+        else if (array instanceof boolean[])
+            return ((boolean[]) array).length;
+        else if (array instanceof byte[])
+            return ((byte[]) array).length;
+        else if (array instanceof char[])
+            return ((char[]) array).length;
+        else if (array instanceof short[])
+            return ((short[]) array).length;
+        else if (array instanceof int[])
+            return ((int[]) array).length;
+        else if (array instanceof long[])
+            return ((long[]) array).length;
+        else if (array instanceof float[])
+            return ((float[]) array).length;
+        else if (array instanceof double[])
+            return ((double[]) array).length;
         else if (array == null)
             throw new NullPointerException("Array is null!");
         else if (!array.getClass().isArray())
             throw new IllegalArgumentException("Argument is not an array!");
-        else
-            throw new IllegalStateException();
+        throw new IllegalStateException();
     }
     
     
@@ -570,224 +715,33 @@ public final class ArrayTools {
      *     length of the specified array.
      * 
      * @see java.lang.reflect.Array#get(Object, int) &nbsp reflect entry point.
-     * @see #getBoolean(Object, int)
-     * @see #getByte(Object, int)
-     * @see #getShort(Object, int)
-     * @see #getInt(Object, int)
-     * @see #getLong(Object, int)
-     * @see #getFloat(Object, int)
-     * @see #getDouble(Object, int)
      */
     @SuppressWarnings("unchecked")
     public static <T> T get(Object array, int index)
             throws IllegalArgumentException {
-        if (array instanceof Object[]) return (T) ((Object[]) array)[index];
-        else if (array instanceof boolean[]) return (T) (Boolean) ((boolean[]) array)[index];
-        else if (array instanceof byte[]) return (T) (Byte) ((byte[]) array)[index];
-        else if (array instanceof short[]) return (T) (Short) ((short[]) array)[index];
-        else if (array instanceof char[]) return (T) (Character) ((char[]) array)[index];
-        else if (array instanceof int[]) return (T) (Integer) ((int[]) array)[index];
-        else if (array instanceof long[]) return (T) (Long) ((long[]) array)[index];
-        else if (array instanceof float[]) return (T) (Float) ((float[]) array)[index];
-        else if (array instanceof double[]) return (T) (Double) ((double[]) array)[index];
-        else if (array == null) {
+        if (array instanceof Object[])
+            return (T) ((Object[]) array)[index];
+        else if (array instanceof boolean[])
+            return (T) (Boolean) ((boolean[]) array)[index];
+        else if (array instanceof byte[])
+            return (T) (Byte) ((byte[]) array)[index];
+        else if (array instanceof short[])
+            return (T) (Short) ((short[]) array)[index];
+        else if (array instanceof char[])
+            return (T) (Character) ((char[]) array)[index];
+        else if (array instanceof int[])
+            return (T) (Integer) ((int[]) array)[index];
+        else if (array instanceof long[])
+            return (T) (Long) ((long[]) array)[index];
+        else if (array instanceof float[])
+            return (T) (Float) ((float[]) array)[index];
+        else if (array instanceof double[])
+            return (T) (Double) ((double[]) array)[index];
+        else if (array == null)
             throw new NullPointerException("Array is null!");    
-        } else if (!array.getClass().isArray()) {
+        else if (!array.getClass().isArray())
             throw new IllegalArgumentException("Argument is not an array!");
-        }
         throw new IllegalStateException();
-    }
-
-    /**
-     * Returns the value of the indexed component in the specified
-     * array object, as a {@code boolean}.
-     *
-     * @param array The array.
-     * @param index The index.
-     * 
-     * @return The value of the indexed component in the specified array.
-     * 
-     * @throws ClassCastException If the specified object is not
-     *     an array, or if the indexed element cannot be converted to the
-     *     return type by an identity or widening conversion
-     * @throws ArrayIndexOutOfBoundsException If the specified {@code index}
-     *     argument is negative, or if it is greater than or equal to the
-     *     length of the specified array
-     * 
-     * @see java.lang.reflect.Array#getBoolean(Object, int) &nbsp reflect entry point.
-     * @see #get(Object, int)
-     */
-    public static boolean getBoolean(Object array, int index)
-            throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
-        return ((boolean[]) array)[index];
-    }
-    
-    /**
-     * Returns the value of the indexed component in the specified
-     * array object, as a {@code byte}.
-     *
-     * @param array The array.
-     * @param index The index.
-     * 
-     * @return The value of the indexed component in the specified array.
-     * 
-     * @throws ClassCastException If the specified object is not
-     *     an array, or if the indexed element cannot be converted to the
-     *     return type by an identity or widening conversion
-     * @throws ArrayIndexOutOfBoundsException If the specified {@code index}
-     *     argument is negative, or if it is greater than or equal to the
-     *     length of the specified array
-     * 
-     * @see java.lang.reflect.Array#getByte(Object, int) &nbsp reflect entry point.
-     * @see #get(Object, int)
-     */
-    public static byte getByte(Object array, int index)
-            throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
-        return ((byte[]) array)[index];
-    }
-    
-    /**
-     * Returns the value of the indexed component in the specified
-     * array object, as a {@code boolean}.
-     *
-     * @param array The array.
-     * @param index The index.
-     * 
-     * @return The value of the indexed component in the specified array.
-     * 
-     * @throws ClassCastException If the specified object is not
-     *     an array, or if the indexed element cannot be converted to the
-     *     return type by an identity or widening conversion
-     * @throws ArrayIndexOutOfBoundsException If the specified {@code index}
-     *     argument is negative, or if it is greater than or equal to the
-     *     length of the specified array
-     * 
-     * @see java.lang.reflect.Array#getShort(Object, int) &nbsp reflect entry point.
-     * @see #get(Object, int)
-     */
-    public static short getShort(Object array, int index)
-            throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
-        return ((short[]) array)[index];
-    }
-    
-    /**
-     * Returns the value of the indexed component in the specified
-     * array object, as a {@code char}.
-     *
-     * @param array The array.
-     * @param index The index.
-     * 
-     * @return The value of the indexed component in the specified array.
-     * 
-     * @throws ClassCastException If the specified object is not
-     *     an array, or if the indexed element cannot be converted to the
-     *     return type by an identity or widening conversion
-     * @throws ArrayIndexOutOfBoundsException If the specified {@code index}
-     *     argument is negative, or if it is greater than or equal to the
-     *     length of the specified array
-     * 
-     * @see java.lang.reflect.Array#getChar(Object, int) &nbsp reflect entry point.
-     * @see #get(Object, int)
-     */
-    public static char getChar(Object array, int index)
-            throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
-        return ((char[]) array)[index];
-    }
-    
-    /**
-     * Returns the value of the indexed component in the specified
-     * array object, as a {@code short}.
-     *
-     * @param array The array.
-     * @param index The index.
-     * 
-     * @return The value of the indexed component in the specified array.
-     * 
-     * @throws ClassCastException If the specified object is not
-     *     an array, or if the indexed element cannot be converted to the
-     *     return type by an identity or widening conversion
-     * @throws ArrayIndexOutOfBoundsException If the specified {@code index}
-     *     argument is negative, or if it is greater than or equal to the
-     *     length of the specified array
-     * 
-     * @see java.lang.reflect.Array#getInt(Object, int) &nbsp reflect entry point.
-     * @see #get(Object, int)
-     */
-    public static int getInt(Object array, int index)
-            throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
-        return ((int[]) array)[index];
-    }
-    
-    /**
-     * Returns the value of the indexed component in the specified
-     * array object, as a {@code long}.
-     *
-     * @param array The array.
-     * @param index The index.
-     * 
-     * @return The value of the indexed component in the specified array.
-     * 
-     * @throws ClassCastException If the specified object is not
-     *     an array, or if the indexed element cannot be converted to the
-     *     return type by an identity or widening conversion
-     * @throws ArrayIndexOutOfBoundsException If the specified {@code index}
-     *     argument is negative, or if it is greater than or equal to the
-     *     length of the specified array
-     * 
-     * @see java.lang.reflect.Array#getLong(Object, int) &nbsp reflect entry point.
-     * @see #get(Object, int)
-     */
-    public static long getLong(Object array, int index)
-            throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
-        return ((long[]) array)[index];
-    }
-    
-    /**
-     * Returns the value of the indexed component in the specified
-     * array object, as a {@code float}.
-     *
-     * @param array The array.
-     * @param index The index.
-     * 
-     * @return The value of the indexed component in the specified array.
-     * 
-     * @throws ClassCastException If the specified object is not
-     *     an array, or if the indexed element cannot be converted to the
-     *     return type by an identity or widening conversion
-     * @throws ArrayIndexOutOfBoundsException If the specified {@code index}
-     *     argument is negative, or if it is greater than or equal to the
-     *     length of the specified array
-     * 
-     * @see java.lang.reflect.Array#getFloat(Object, int) &nbsp reflect entry point.
-     * @see #get(Object, int)
-     */
-    public static float getFloat(Object array, int index)
-            throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
-        return ((float[]) array)[index];
-    }
-    
-    /**
-     * Returns the value of the indexed component in the specified
-     * array object, as a {@code double}.
-     *
-     * @param array The array.
-     * @param index The index.
-     * 
-     * @return The value of the indexed component in the specified array.
-     * 
-     * @throws ClassCastException If the specified object is not
-     *     an array, or if the indexed element cannot be converted to the
-     *     return type by an identity or widening conversion
-     * @throws ArrayIndexOutOfBoundsException If the specified {@code index}
-     *     argument is negative, or if it is greater than or equal to the
-     *     length of the specified array
-     * 
-     * @see java.lang.reflect.Array#getDouble(Object, int) &nbsp reflect entry point.
-     * @see #get(Object, int)
-     */
-    public static double getDouble(Object array, int index)
-            throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
-        return ((double[]) array)[index];
     }
     
     
@@ -813,216 +767,33 @@ public final class ArrayTools {
      *     as {@code array}.
      * 
      * @see java.lang.reflect.Array#set(Object, int, Object) &nbsp reflect entry point
-     * @see #setBoolean(Object, int, boolean)
-     * @see #setByte(Object, int, byte)
-     * @see #setShort(Object, int, short)
-     * @see #setInt(Object, int, int)
-     * @see #setLong(Object, int, long)
-     * @see #setFloat(Object, int, float)
-     * @see #setDouble(Object, int, double)
      */
     public static void set(Object array, int index, Object value)
             throws IllegalArgumentException, ArrayIndexOutOfBoundsException,
             ClassCastException {
-        if (array instanceof Object[]) ((Object[]) array)[index] = value;
-        else if (array instanceof boolean[]) ((boolean[]) array)[index] = (boolean) value;
-        else if (array instanceof byte[]) ((byte[]) array)[index] = (byte) value;
-        else if (array instanceof short[]) ((short[]) array)[index] = (short) value;
-        else if (array instanceof char[]) ((char[]) array)[index] = (char) value;
-        else if (array instanceof int[]) ((int[]) array)[index] = (int) value;
-        else if (array instanceof long[]) ((long[]) array)[index] = (long) value;
-        else if (array instanceof float[]) ((float[]) array)[index] = (float) value;
-        else if (array instanceof double[]) ((double[]) array)[index] = (double) value;
+        if (array instanceof Object[])
+            ((Object[]) array)[index] = value;
+        else if (array instanceof boolean[])
+            ((boolean[]) array)[index] = (boolean) value;
+        else if (array instanceof byte[])
+            ((byte[]) array)[index] = (byte) value;
+        else if (array instanceof short[])
+            ((short[]) array)[index] = (short) value;
+        else if (array instanceof char[])
+            ((char[]) array)[index] = (char) value;
+        else if (array instanceof int[])
+            ((int[]) array)[index] = (int) value;
+        else if (array instanceof long[])
+            ((long[]) array)[index] = (long) value;
+        else if (array instanceof float[])
+            ((float[]) array)[index] = (float) value;
+        else if (array instanceof double[])
+            ((double[]) array)[index] = (double) value;
         else if (array == null)
             throw new NullPointerException("Array is null!");    
         else if (!array.getClass().isArray())
             throw new IllegalArgumentException("Argument is not an array!");
-        else
-            throw new IllegalStateException();
-    }
-
-    /**
-     * Sets the value of the indexed component of the specified array
-     * object to the specified {@code boolean} value.
-     * 
-     * @param array The array.
-     * @param index The index into the array.
-     * @param b The new value of the indexed component.
-     * 
-     * @throws IllegalArgumentException If the given object {@code array} is not a boolean array.
-     * @throws ArrayIndexOutOfBoundsException If the specified {@code index}
-     *     argument is negative, or if it is greater than or equal to
-     *     the length of the specified array.
-     * 
-     * @see java.lang.reflect.Array#setBoolean(Object, int, boolean) &nbsp reflect entry point.
-     * @see #set(Object, int, Object)
-     */
-    public static void setBoolean(Object array, int index, boolean b)
-            throws ArrayIndexOutOfBoundsException, IllegalArgumentException {
-        if (array instanceof boolean[]) ((boolean[]) array)[index] = b;
-        else if (array instanceof Boolean[]) ((Boolean[]) array)[index] = b;
-        else throw new IllegalArgumentException();
-    }
-
-    /**
-     * Sets the value of the indexed component of the specified array
-     * object to the specified {@code byte} value.
-     * 
-     * @param array The array.
-     * @param index The index into the array.
-     * @param b The new value of the indexed component.
-     * 
-     * @throws IllegalArgumentException If the given object {@code array} is not a byte array.
-     * @throws ArrayIndexOutOfBoundsException If the specified {@code index}
-     *     argument is negative, or if it is greater than or equal to
-     *     the length of the specified array.
-     * 
-     * @see java.lang.reflect.Array#setByte(Object, int, byte) &nbsp reflect entry point.
-     * @see #set(Object, int, Object)
-     */
-    public static void setByte(Object array, int index, byte b)
-            throws ArrayIndexOutOfBoundsException, IllegalArgumentException {
-        if (array instanceof byte[]) ((byte[]) array)[index] = b;
-        else if (array instanceof Byte[]) ((Byte[]) array)[index] = b;
-        else throw new IllegalArgumentException();
-    }
-
-    /**
-     * Sets the value of the indexed component of the specified array
-     * object to the specified {@code short} value.
-     * 
-     * @param array The array.
-     * @param index The index into the array.
-     * @param s The new value of the indexed component.
-     * 
-     * @throws IllegalArgumentException If the given object {@code array} is not a short array.
-     * @throws ArrayIndexOutOfBoundsException If the specified {@code index}
-     *     argument is negative, or if it is greater than or equal to
-     *     the length of the specified array.
-     * 
-     * @see java.lang.reflect.Array#setShort(Object, int, short) &nbsp reflect entry point.
-     * @see #set(Object, int, Object)
-     */
-    public static void setShort(Object array, int index, short s)
-            throws ArrayIndexOutOfBoundsException, IllegalArgumentException {
-        if (array instanceof short[]) ((short[]) array)[index] = s;
-        else if (array instanceof Short[]) ((Short[]) array)[index] = s;
-        else throw new IllegalArgumentException();
-    }
-
-    /**
-     * Sets the value of the indexed component of the specified array
-     * object to the specified {@code char} value.
-     * 
-     * @param array The array.
-     * @param index The index into the array.
-     * @param c The new value of the indexed component.
-     * 
-     * @throws IllegalArgumentException If the given object {@code array} is not a char array.
-     * @throws ArrayIndexOutOfBoundsException If the specified {@code index}
-     *     argument is negative, or if it is greater than or equal to
-     *     the length of the specified array.
-     * 
-     * @see java.lang.reflect.Array#setChar(Object, int, char) &nbsp reflect entry point.
-     * @see #set(Object, int, Object)
-     */
-    public static void setChar(Object array, int index, char c)
-            throws ArrayIndexOutOfBoundsException, IllegalArgumentException {
-        if (array instanceof char[]) ((char[]) array)[index] = c;
-        else if (array instanceof Character[]) ((Character[]) array)[index] = c;
-        else throw new IllegalArgumentException();
-    }
-
-    /**
-     * Sets the value of the indexed component of the specified array
-     * object to the specified {@code int} value.
-     * 
-     * @param array The array.
-     * @param index The index into the array.
-     * @param i The new value of the indexed component.
-     * 
-     * @throws IllegalArgumentException If the given object {@code array} is not a int array.
-     * @throws ArrayIndexOutOfBoundsException If the specified {@code index}
-     *     argument is negative, or if it is greater than or equal to
-     *     the length of the specified array.
-     * 
-     * @see java.lang.reflect.Array#setInt(Object, int, int) &nbsp reflect entry point.
-     * @see #set(Object, int, Object)
-     */
-    public static void setInt(Object array, int index, int i)
-            throws ArrayIndexOutOfBoundsException, IllegalArgumentException {
-        if (array instanceof int[]) ((int[]) array)[index] = i;
-        else if (array instanceof Integer[]) ((Integer[]) array)[index] = i;
-        else throw new IllegalArgumentException();
-    }
-
-    /**
-     * Sets the value of the indexed component of the specified array
-     * object to the specified {@code long} value.
-     * 
-     * @param array The array.
-     * @param index The index into the array.
-     * @param l The new value of the indexed component.
-     * 
-     * @throws IllegalArgumentException If the given object {@code array} is not a long array.
-     * @throws ArrayIndexOutOfBoundsException If the specified {@code index}
-     *     argument is negative, or if it is greater than or equal to
-     *     the length of the specified array.
-     * 
-     * @see java.lang.reflect.Array#setLong(Object, int, long) &nbsp reflect entry point.
-     * @see #set(Object, int, Object)
-     */
-    public static void setLong(Object array, int index, long l)
-            throws ArrayIndexOutOfBoundsException, IllegalArgumentException {
-        if (array instanceof long[]) ((long[]) array)[index] = l;
-        else if (array instanceof Long[]) ((Long[]) array)[index] = l;
-        else throw new IllegalArgumentException();
-    }
-
-    /**
-     * Sets the value of the indexed component of the specified array
-     * object to the specified {@code boolean} value.
-     * 
-     * @param array The array.
-     * @param index The index into the array.
-     * @param f The new value of the indexed component.
-     * 
-     * @throws IllegalArgumentException If the given object {@code array} is not a float array.
-     * @throws ArrayIndexOutOfBoundsException If the specified {@code index}
-     *     argument is negative, or if it is greater than or equal to
-     *     the length of the specified array.
-     * 
-     * @see java.lang.reflect.Array#setFloat(Object, int, float) &nbsp reflect entry point.
-     * @see #set(Object, int, Object)
-     */
-    public static void setFloat(Object array, int index, float f)
-            throws ArrayIndexOutOfBoundsException, IllegalArgumentException {
-        if (array instanceof float[]) ((float[]) array)[index] = f;
-        else if (array instanceof Float[]) ((Float[]) array)[index] = f;
-        else throw new IllegalArgumentException();
-    }
-
-    /**
-     * Sets the value of the indexed component of the specified array
-     * object to the specified {@code double} value.
-     * 
-     * @param array The array.
-     * @param index The index into the array.
-     * @param d The new value of the indexed component.
-     * 
-     * @throws IllegalArgumentException If the given object {@code array} is not a double array.
-     * @throws ArrayIndexOutOfBoundsException If the specified {@code index}
-     *     argument is negative, or if it is greater than or equal to
-     *     the length of the specified array.
-     * 
-     * @see java.lang.reflect.Array#setDouble(Object, int, double) &nbsp reflect entry point.
-     * @see #set(Object, int, Object)
-     */
-    public static void setDouble(Object array, int index, double d)
-            throws ArrayIndexOutOfBoundsException, IllegalArgumentException {
-        if (array instanceof double[]) ((double[]) array)[index] = d;
-        else if (array instanceof Double[]) ((Double[]) array)[index] = d;
-        else throw new IllegalArgumentException();
+        throw new IllegalStateException();
     }
     
     
@@ -1045,21 +816,29 @@ public final class ArrayTools {
      */
     @SuppressWarnings("unchecked")
     public static <V> List<V> asList(Object array) {
-        if (array instanceof Object[]) return asList((V[]) array);
-        if (array instanceof boolean[]) return (List<V>) asList((boolean[]) array);
-        if (array instanceof byte[]) return (List<V>) asList((byte[]) array);
-        if (array instanceof char[]) return (List<V>) asList((char[]) array);
-        if (array instanceof short[]) return (List<V>) asList((short[]) array);
-        if (array instanceof int[]) return (List<V>) asList((int[]) array);
-        if (array instanceof long[]) return (List<V>) asList((long[]) array);
-        if (array instanceof float[]) return (List<V>) asList((float[]) array);
-        if (array instanceof double[]) return (List<V>) asList((double[]) array);
+        if (array instanceof Object[])
+            return asList((V[]) array);
+        if (array instanceof boolean[])
+            return (List<V>) asList((boolean[]) array);
+        if (array instanceof byte[])
+            return (List<V>) asList((byte[]) array);
+        if (array instanceof char[])
+            return (List<V>) asList((char[]) array);
+        if (array instanceof short[])
+            return (List<V>) asList((short[]) array);
+        if (array instanceof int[])
+            return (List<V>) asList((int[]) array);
+        if (array instanceof long[])
+            return (List<V>) asList((long[]) array);
+        if (array instanceof float[])
+            return (List<V>) asList((float[]) array);
+        if (array instanceof double[])
+            return (List<V>) asList((double[]) array);
         if (array == null)
             throw new NullPointerException("Array is null!");
         if (!array.getClass().isArray())
             throw new IllegalArgumentException("Argument is not an array!");
-        else
-            throw new IllegalStateException();
+        throw new IllegalStateException();
     }
 
     /**
@@ -1365,21 +1144,29 @@ public final class ArrayTools {
      */
     @SuppressWarnings("unchecked")
     public static <V> List<V> toList(Object array) {
-        if (array instanceof Object[]) return toList((V[]) array);
-        if (array instanceof boolean[]) return (List<V>) toList((boolean[]) array);
-        if (array instanceof byte[]) return (List<V>) toList((byte[]) array);
-        if (array instanceof char[]) return (List<V>) toList((char[]) array);
-        if (array instanceof short[]) return (List<V>) toList((short[]) array);
-        if (array instanceof int[]) return (List<V>) toList((int[]) array);
-        if (array instanceof long[]) return (List<V>) toList((long[]) array);
-        if (array instanceof float[]) return (List<V>) toList((float[]) array);
-        if (array instanceof double[]) return (List<V>) toList((double[]) array);
+        if (array instanceof Object[])
+            return toList((V[]) array);
+        if (array instanceof boolean[])
+            return (List<V>) toList((boolean[]) array);
+        if (array instanceof byte[])
+            return (List<V>) toList((byte[]) array);
+        if (array instanceof char[])
+            return (List<V>) toList((char[]) array);
+        if (array instanceof short[])
+            return (List<V>) toList((short[]) array);
+        if (array instanceof int[])
+            return (List<V>) toList((int[]) array);
+        if (array instanceof long[])
+            return (List<V>) toList((long[]) array);
+        if (array instanceof float[])
+            return (List<V>) toList((float[]) array);
+        if (array instanceof double[])
+            return (List<V>) toList((double[]) array);
         if (array == null)
             throw new NullPointerException("Array is null!");
         if (!array.getClass().isArray())
             throw new IllegalArgumentException("Argument is not an array!");
-        else
-            throw new IllegalStateException();
+        throw new IllegalStateException();
     }
     
     /**
@@ -1756,17 +1543,28 @@ public final class ArrayTools {
     @SuppressWarnings("unchecked")
     public static <A> A swap(A arr, int i, int j)
             throws ArrayIndexOutOfBoundsException {
-        if (arr instanceof Object[]) return (A) swap((Object[]) arr, i, j);
-        if (arr instanceof boolean[]) return (A) swap((boolean[]) arr, i, j);
-        if (arr instanceof byte[]) return (A) swap((byte[]) arr, i, j);
-        if (arr instanceof short[]) return (A) swap((short[]) arr, i, j);
-        if (arr instanceof char[]) return (A) swap((char[]) arr, i, j);
-        if (arr instanceof int[]) return (A) swap((int[]) arr, i, j);
-        if (arr instanceof long[]) return (A) swap((long[]) arr, i, j);
-        if (arr instanceof float[]) return (A) swap((float[]) arr, i, j);
-        if (arr instanceof double[]) return (A) swap((double[]) arr, i, j);
-        if (arr == null) throw new NullPointerException();
-        if (!arr.getClass().isArray()) throw new IllegalArgumentException("Object is not an array!");
+        if (arr instanceof Object[])
+            return (A) swap((Object[]) arr, i, j);
+        else if (arr instanceof boolean[])
+            return (A) swap((boolean[]) arr, i, j);
+        else if (arr instanceof byte[])
+            return (A) swap((byte[]) arr, i, j);
+        else if (arr instanceof short[])
+            return (A) swap((short[]) arr, i, j);
+        else if (arr instanceof char[])
+            return (A) swap((char[]) arr, i, j);
+        else if (arr instanceof int[])
+            return (A) swap((int[]) arr, i, j);
+        else if (arr instanceof long[])
+            return (A) swap((long[]) arr, i, j);
+        else if (arr instanceof float[])
+            return (A) swap((float[]) arr, i, j);
+        else if (arr instanceof double[])
+            return (A) swap((double[]) arr, i, j);
+        else if (arr == null)
+            throw new NullPointerException();
+        else if (!arr.getClass().isArray())
+            throw new IllegalArgumentException("Object is not an array!");
         throw new IllegalStateException();
     }
     
@@ -2030,17 +1828,28 @@ public final class ArrayTools {
      */
     @SuppressWarnings("unchecked")
     public static <A> A shuffle(A arr, Random ran) {
-        if (arr instanceof Object[]) return (A) shuffle((Object[]) arr, ran);
-        if (arr instanceof boolean[]) return (A) shuffle((boolean[]) arr, ran);
-        if (arr instanceof byte[]) return (A) shuffle((byte[]) arr, ran);
-        if (arr instanceof short[]) return (A) shuffle((short[]) arr, ran);
-        if (arr instanceof char[]) return (A) shuffle((char[]) arr, ran);
-        if (arr instanceof int[]) return (A) shuffle((int[]) arr, ran);
-        if (arr instanceof long[]) return (A) shuffle((long[]) arr, ran);
-        if (arr instanceof float[]) return (A) shuffle((float[]) arr, ran);
-        if (arr instanceof double[]) return (A) shuffle((double[]) arr, ran);
-        if (arr == null) throw new NullPointerException();
-        if (!arr.getClass().isArray()) throw new IllegalArgumentException("Object is not an array!");
+        if (arr instanceof Object[])
+            return (A) shuffle((Object[]) arr, ran);
+        else if (arr instanceof boolean[])
+            return (A) shuffle((boolean[]) arr, ran);
+        else if (arr instanceof byte[])
+            return (A) shuffle((byte[]) arr, ran);
+        else if (arr instanceof short[])
+            return (A) shuffle((short[]) arr, ran);
+        else if (arr instanceof char[])
+            return (A) shuffle((char[]) arr, ran);
+        else if (arr instanceof int[])
+            return (A) shuffle((int[]) arr, ran);
+        else if (arr instanceof long[])
+            return (A) shuffle((long[]) arr, ran);
+        else if (arr instanceof float[])
+            return (A) shuffle((float[]) arr, ran);
+        else if (arr instanceof double[])
+            return (A) shuffle((double[]) arr, ran);
+        else if (arr == null)
+            throw new NullPointerException();
+        else if (!arr.getClass().isArray())
+            throw new IllegalArgumentException("Object is not an array!");
         throw new IllegalStateException();
     }
     
@@ -2565,21 +2374,29 @@ public final class ArrayTools {
      */
     @SuppressWarnings("unchecked")
     public static <V> void forEach(Object arr, Consumer<?> action) {
-        if (arr instanceof Object[]) forEach((V[]) arr, (Consumer<? super V>) action);
-        else if (arr instanceof boolean[]) forEach((boolean[]) arr, (Consumer<Boolean>) action);
-        else if (arr instanceof byte[]) forEach((byte[]) arr, (Consumer<Byte>) action);
-        else if (arr instanceof short[]) forEach((short[]) arr, (Consumer<Short>) action);
-        else if (arr instanceof char[]) forEach((char[]) arr, (Consumer<Character>) action);
-        else if (arr instanceof int[]) forEach((int[]) arr, (Consumer<Integer>) action);
-        else if (arr instanceof long[]) forEach((long[]) arr,(Consumer<Long>)  action);
-        else if (arr instanceof float[]) forEach((float[]) arr, (Consumer<Float>) action);
-        else if (arr instanceof double[]) forEach((double[]) arr, (Consumer<Double>) action);
+        if (arr instanceof Object[])
+            forEach((V[]) arr, (Consumer<? super V>) action);
+        else if (arr instanceof boolean[])
+            forEach((boolean[]) arr, (Consumer<Boolean>) action);
+        else if (arr instanceof byte[])
+            forEach((byte[]) arr, (Consumer<Byte>) action);
+        else if (arr instanceof short[])
+            forEach((short[]) arr, (Consumer<Short>) action);
+        else if (arr instanceof char[])
+            forEach((char[]) arr, (Consumer<Character>) action);
+        else if (arr instanceof int[])
+            forEach((int[]) arr, (Consumer<Integer>) action);
+        else if (arr instanceof long[])
+            forEach((long[]) arr,(Consumer<Long>)  action);
+        else if (arr instanceof float[])
+            forEach((float[]) arr, (Consumer<Float>) action);
+        else if (arr instanceof double[])
+            forEach((double[]) arr, (Consumer<Double>) action);
         else if (arr == null)
             throw new NullPointerException();
         else if (!arr.getClass().isArray())
             throw new IllegalArgumentException("Object is not an array!");
-        else
-            throw new IllegalStateException();
+        throw new IllegalStateException();
     }
     
     /**
@@ -2709,6 +2526,7 @@ public final class ArrayTools {
             action.accept(d);
         }
     }
+    
     
     /* ------------------------------------------------------------------------
      * Deep equals function.
@@ -3157,8 +2975,7 @@ public final class ArrayTools {
             
         } else if (!array.getClass().isArray())
             throw new IllegalArgumentException("The given object is not an array!");
-        else
-            throw new IllegalStateException();
+        throw new IllegalStateException();
     }
 
 
@@ -3295,15 +3112,24 @@ public final class ArrayTools {
             return result;
 
         } else { // {@code obj} is a single object.
-            if (obj instanceof Boolean) return calcHashCode((boolean) obj);
-            else if (obj instanceof Byte) return calcHashCode((byte) obj);
-            else if (obj instanceof Short) return calcHashCode((short) obj);
-            else if (obj instanceof Character) return calcHashCode((char) obj);
-            else if (obj instanceof Integer) return calcHashCode((int) obj);
-            else if (obj instanceof Long) return calcHashCode((long) obj);
-            else if (obj instanceof Float) return calcHashCode((float) obj);
-            else if (obj instanceof Double) return calcHashCode((double) obj);
-            else return obj.hashCode();
+            if (obj instanceof Boolean)
+                return calcHashCode((boolean) obj);
+            else if (obj instanceof Byte)
+                return calcHashCode((byte) obj);
+            else if (obj instanceof Short)
+                return calcHashCode((short) obj);
+            else if (obj instanceof Character)
+                return calcHashCode((char) obj);
+            else if (obj instanceof Integer)
+                return calcHashCode((int) obj);
+            else if (obj instanceof Long)
+                return calcHashCode((long) obj);
+            else if (obj instanceof Float)
+                return calcHashCode((float) obj);
+            else if (obj instanceof Double)
+                return calcHashCode((double) obj);
+            else
+                return obj.hashCode();
         }
     }
 
@@ -3436,8 +3262,607 @@ public final class ArrayTools {
     
     
     /* ------------------------------------------------------------------------
-     * Binary search functions.
+     * Element counting functions.
      * ------------------------------------------------------------------------
      */
+    /**
+     * Performs a linear search to determine the index of the given element
+     * in the array.
+     * 
+     * @apiNote
+     * This function runs in {@code O(n)}.
+     * 
+     * @param arr  The array to search through.
+     * @param elem The element to look for.
+     * 
+     * @return The first index of the element in the array, or {@code -1} if it does
+     *         not occur.
+     */
+    public static int indexOf(Object arr, Object elem) {
+        if (arr instanceof Object[])
+            return indexOf((Object[]) arr, elem);
+        else if (arr instanceof boolean[])
+            return indexOf((boolean[]) arr, (boolean) elem);
+        else if (arr instanceof byte[])
+            return indexOf((byte[]) arr, (byte) elem);
+        else if (arr instanceof short[])
+            return indexOf((short[]) arr, (short) elem);
+        else if (arr instanceof char[])
+            return indexOf((char[]) arr, (char) elem);
+        else if (arr instanceof int[])
+            return indexOf((int[]) arr, (int) elem);
+        else if (arr instanceof long[])
+            return indexOf((long[]) arr, (long) elem);
+        else if (arr instanceof float[])
+            return indexOf((float[]) arr, (float) elem);
+        else if (arr instanceof double[])
+            return indexOf((double[]) arr, (double) elem);
+        else if (arr == null)
+            throw new NullPointerException();
+        else if (!arr.getClass().isArray())
+            throw new IllegalArgumentException("Object is not an array!");
+        throw new IllegalStateException();
+    }
+
+    /**
+     * Performs a linear search to determine the index of the given element
+     * in the array.
+     *
+     * @param arr  The array to search through.
+     * @param elem The element to look for.
+     * @param <V>  The of the array and element.
+     *
+     * @return The first index of the element in the array, or {@code -1} if it does
+     *         not occur.
+     */
+    public static <V> int indexOf(V[] arr, V elem) {
+        for (int i = 0; i < arr.length; i++) {
+            if (Objects.equals(arr[i], elem)) return i;
+        }
+        return -1;
+    }
+    
+    /**
+     * Performs a linear search to determine the index of the given element
+     * in the array.
+     *
+     * @param arr  The boolean array to search through.
+     * @param elem The boolean to look for.
+     *
+     * @return The first index of the element in the array, or {@code -1} if it does
+     *         not occur.
+     */
+    public static int indexOf(boolean[] arr, Boolean elem) {
+        if (elem == null) return -1;
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i] == elem) return i;
+        }
+        return -1;
+    }
+
+    /**
+     * Performs a linear search to determine the index of the given element
+     * in the array.
+     *
+     * @param arr  The byte array to search through.
+     * @param elem The byte to look for.
+     *
+     * @return The first index of the element in the array, or {@code -1} if it does
+     *         not occur.
+     */
+    public static int indexOf(byte[] arr, Byte elem) {
+        if (elem == null) return -1;
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i] == elem) return i;
+        }
+        return -1;
+    }
+
+    /**
+     * Performs a linear search to determine the index of the given element
+     * in the array.
+     *
+     * @param arr  The short array to search through.
+     * @param elem The short to look for.
+     *
+     * @return The first index of the element in the array, or {@code -1} if it does
+     *         not occur.
+     */
+    public static int indexOf(short[] arr, Short elem) {
+        if (elem == null) return -1;
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i] == elem) return i;
+        }
+        return -1;
+    }
+
+    /**
+     * Performs a linear search to determine the index of the given element
+     * in the array.
+     *
+     * @param arr  The char array to search through.
+     * @param elem The char to look for.
+     *
+     * @return The first index of the element in the array, or {@code -1} if it does
+     *         not occur.
+     */
+    public static int indexOf(char[] arr, Character elem) {
+        if (elem == null) return -1;
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i] == elem) return i;
+        }
+        return -1;
+    }
+
+    /**
+     * Performs a linear search to determine the index of the given element
+     * in the array.
+     *
+     * @param arr  The int array to search through.
+     * @param elem The int to look for.
+     *
+     * @return The first index of the element in the array, or {@code -1} if it does
+     *         not occur.
+     */
+    public static <V> int indexOf(int[] arr, Integer elem) {
+        if (elem == null) return -1;
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i] == elem) return i;
+        }
+        return -1;
+    }
+
+    /**
+     * Performs a linear search to determine the index of the given element
+     * in the array.
+     *
+     * @param arr  The long array to search through.
+     * @param elem The long to look for.
+     *
+     * @return The first index of the element in the array, or {@code -1} if it does
+     *         not occur.
+     */
+    public static int indexOf(long[] arr, Long elem) {
+        if (elem == null) return -1;
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i] == elem) return i;
+        }
+        return -1;
+    }
+
+    /**
+     * Performs a linear search to determine the index of the given element
+     * in the array.
+     *
+     * @param arr  The float array to search through.
+     * @param elem The float to look for.
+     *
+     * @return The first index of the element in the array, or {@code -1} if it does
+     *         not occur.
+     */
+    public static int indexOf(float[] arr, Float elem) {
+        if (elem == null) return -1;
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i] == elem) return i;
+        }
+        return -1;
+    }
+
+    /**
+     * Performs a linear search to determine the index of the given element
+     * in the array.
+     *
+     * @param arr  The double array to search through.
+     * @param elem The double to look for.
+     *
+     * @return The first index of the element in the array, or {@code -1} if it does
+     *         not occur.
+     */
+    public static int indexOf(double[] arr, Double elem) {
+        if (elem == null) return -1;
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i] == elem) return i;
+        }
+        return -1;
+    }
+    
+    /**
+     * Performs a reverse linear search to determine the index of the given
+     * element in the array.
+     *
+     * @apiNote
+     * This function runs in {@code O(n)}.
+     *
+     * @param arr  The array to search through.
+     * @param elem The element to look for.
+     *
+     * @return The last index of the element in the array, or {@code -1} if it does
+     *         not occur.
+     */
+    public static int lastIndexOf(Object arr, Object elem) {
+        if (arr instanceof Object[])
+            return indexOf((Object[]) arr, elem);
+        else if (arr instanceof boolean[])
+            return indexOf((boolean[]) arr, (boolean) elem);
+        else if (arr instanceof byte[])
+            return indexOf((byte[]) arr, (byte) elem);
+        else if (arr instanceof short[])
+            return indexOf((short[]) arr, (short) elem);
+        else if (arr instanceof char[])
+            return indexOf((char[]) arr, (char) elem);
+        else if (arr instanceof int[])
+            return indexOf((int[]) arr, (int) elem);
+        else if (arr instanceof long[])
+            return indexOf((long[]) arr, (long) elem);
+        else if (arr instanceof float[])
+            return indexOf((float[]) arr, (float) elem);
+        else if (arr instanceof double[])
+            return indexOf((double[]) arr, (double) elem);
+        else if (arr == null)
+            throw new NullPointerException();
+        else if (!arr.getClass().isArray())
+            throw new IllegalArgumentException("Object is not an array!");
+        throw new IllegalStateException();
+    }
+
+    /**
+     * Performs a reverse linear search to determine the index of the given
+     * element in the array.
+     *
+     * @param arr  The array to search through.
+     * @param elem The element to look for.
+     * @param <V>  The of the array and element.
+     * 
+     * @return The last index of the element in the array, or {@code -1} if it does
+     *         not occur.
+     */
+    public static <V> int lastIndexOf(V[] arr, V elem) {
+        for (int i = arr.length - 1; i >= 0; i--) {
+            if (Objects.equals(arr[i], elem)) return i;
+        }
+        return -1;
+    }
+
+    /**
+     * Performs a reverse linear search to determine the index of the given
+     * element in the array.
+     *
+     * @param arr  The boolean array to search through.
+     * @param elem The boolean to look for.
+     *
+     * @return The last index of the element in the array, or {@code -1} if it does
+     *         not occur.
+     */
+    public static int lastIndexOf(boolean[] arr, Boolean elem) {
+        if (elem == null) return -1;
+        for (int i = arr.length - 1; i >= 0; i--) {
+            if (arr[i] == elem) return i;
+        }
+        return -1;
+    }
+
+    /**
+     * Performs a reverse linear search to determine the index of the given
+     * element in the array.
+     *
+     * @param arr  The byte array to search through.
+     * @param elem The byte to look for.
+     *
+     * @return The last index of the element in the array, or {@code -1} if it does
+     *         not occur.
+     */
+    public static int lastIndexOf(byte[] arr, Byte elem) {
+        if (elem == null) return -1;
+        for (int i = arr.length - 1; i >= 0; i--) {
+            if (arr[i] == elem) return i;
+        }
+        return -1;
+    }
+
+    /**
+     * Performs a reverse linear search to determine the index of the given
+     * element in the array.
+     *
+     * @param arr  The short array to search through.
+     * @param elem The short to look for.
+     *
+     * @return The last index of the element in the array, or {@code -1} if it does
+     *         not occur.
+     */
+    public static int lastIndexOf(short[] arr, Short elem) {
+        if (elem == null) return -1;
+        for (int i = arr.length - 1; i >= 0; i--) {
+            if (arr[i] == elem) return i;
+        }
+        return -1;
+    }
+
+    /**
+     * Performs a reverse linear search to determine the index of the given
+     * element in the array.
+     *
+     * @param arr  The char array to search through.
+     * @param elem The char to look for.
+     *
+     * @return The last index of the element in the array, or {@code -1} if it does
+     *         not occur.
+     */
+    public static int lastIndexOf(char[] arr, Character elem) {
+        if (elem == null) return -1;
+        for (int i = arr.length - 1; i >= 0; i--) {
+            if (arr[i] == elem) return i;
+        }
+        return -1;
+    }
+
+    /**
+     * Performs a reverse linear search to determine the index of the given
+     * element in the array.
+     *
+     * @param arr  The int array to search through.
+     * @param elem The int to look for.
+     *
+     * @return The last index of the element in the array, or {@code -1} if it does
+     *         not occur.
+     */
+    public static <V> int lastIndexOf(int[] arr, Integer elem) {
+        if (elem == null) return -1;
+        for (int i = arr.length - 1; i >= 0; i--) {
+            if (arr[i] == elem) return i;
+        }
+        return -1;
+    }
+
+    /**
+     * Performs a reverse linear search to determine the index of the given
+     * element in the array.
+     *
+     * @param arr  The long array to search through.
+     * @param elem The long to look for.
+     *
+     * @return The last index of the element in the array, or {@code -1} if it does
+     *         not occur.
+     */
+    public static int lastIndexOf(long[] arr, Long elem) {
+        if (elem == null) return -1;
+        for (int i = arr.length - 1; i >= 0; i--) {
+            if (arr[i] == elem) return i;
+        }
+        return -1;
+    }
+
+    /**
+     * Performs a reverse linear search to determine the index of the given
+     * element in the array.
+     *
+     * @param arr  The float array to search through.
+     * @param elem The float to look for.
+     *
+     * @return The last index of the element in the array, or {@code -1} if it does
+     *         not occur.
+     */
+    public static int lastIndexOf(float[] arr, Float elem) {
+        if (elem == null) return -1;
+        for (int i = arr.length - 1; i >= 0; i--) {
+            if (arr[i] == elem) return i;
+        }
+        return -1;
+    }
+
+    /**
+     * Performs a reverse linear search to determine the index of the given
+     * element in the array.
+     *
+     * @param arr  The double array to search through.
+     * @param elem The double to look for.
+     *
+     * @return The last index of the element in the array, or {@code -1} if it does
+     *         not occur.
+     */
+    public static int lastIndexOf(double[] arr, Double elem) {
+        if (elem == null) return -1;
+        for (int i = arr.length - 1; i >= 0; i--) {
+            if (arr[i] == elem) return i;
+        }
+        return -1;
+    }
+
+    /**
+     * Performs a linear search to determine the amount of occurrences
+     * of the given element in the array.
+     *
+     * @param arr  The array to search through.
+     * @param elem The element to look for.
+     *
+     * @return The num of occurrences of the element in the array.
+     */
+    public static int count(Object arr, Object elem) {
+        if (arr instanceof Object[])
+            return count((Object[]) arr, elem);
+        else if (arr instanceof boolean[])
+            return count((boolean[]) arr, (boolean) elem);
+        else if (arr instanceof byte[])
+            return count((byte[]) arr, (byte) elem);
+        else if (arr instanceof short[])
+            return count((short[]) arr, (short) elem);
+        else if (arr instanceof char[])
+            return count((char[]) arr, (char) elem);
+        else if (arr instanceof int[])
+            return count((int[]) arr, (int) elem);
+        else if (arr instanceof long[])
+            return count((long[]) arr, (long) elem);
+        else if (arr instanceof float[])
+            return count((float[]) arr, (float) elem);
+        else if (arr instanceof double[])
+            return count((double[]) arr, (double) elem);
+        else if (arr == null)
+            throw new NullPointerException();
+        else if (!arr.getClass().isArray())
+            throw new IllegalArgumentException("Object is not an array!");
+        throw new IllegalStateException();
+    }
+
+    /**
+     * Performs a linear search to determine the amount of occurrences
+     * of the given element in the array.
+     *
+     * @param arr  The array to search through.
+     * @param elem The element to look for.
+     * @param <V>  The of the array and element.
+     *
+     * @return The num of occurrences of the element in the array.
+     */
+    public static <V> int count(V[] arr, V elem) {
+        int amt = 0;
+        for (V v : arr) {
+            if (Objects.equals(v, elem)) amt++;
+        }
+        return amt;
+    }
+
+    /**
+     * Performs a linear search to determine the amount of occurrences
+     * of the given element in the array.
+     *
+     * @param arr  The boolean array to search through.
+     * @param elem The boolean to look for.
+     *
+     * @return The num of occurrences of the element in the array.
+     */
+    public static int count(boolean[] arr, Boolean elem) {
+        if (elem == null) return 0;
+        int amt = 0;
+        for (boolean b : arr) {
+            if (b == elem) amt++;
+        }
+        return amt;
+    }
+
+    /**
+     * Performs a linear search to determine the amount of occurrences
+     * of the given element in the array.
+     *
+     * @param arr  The byte array to search through.
+     * @param elem The byte to look for.
+     *
+     * @return The num of occurrences of the element in the array.
+     */
+    public static int count(byte[] arr, Byte elem) {
+        if (elem == null) return 0;
+        int amt = 0;
+        for (byte b : arr) {
+            if (b == elem) amt++;
+        }
+        return amt;
+    }
+
+    /**
+     * Performs a linear search to determine the amount of occurrences
+     * of the given element in the array.
+     *
+     * @param arr  The short array to search through.
+     * @param elem The short to look for.
+     *
+     * @return The num of occurrences of the element in the array.
+     */
+    public static int count(short[] arr, Short elem) {
+        if (elem == null) return 0;
+        int amt = 0;
+        for (short s : arr) {
+            if (s == elem) amt++;
+        }
+        return amt;
+    }
+
+    /**
+     * Performs a linear search to determine the amount of occurrences
+     * of the given element in the array.
+     *
+     * @param arr  The char array to search through.
+     * @param elem The char to look for.
+     *
+     * @return The num of occurrences of the element in the array.
+     */
+    public static int count(char[] arr, Character elem) {
+        if (elem == null) return 0;
+        int amt = 0;
+        for (char c : arr) {
+            if (c == elem) amt++;
+        }
+        return amt;
+    }
+
+    /**
+     * Performs a linear search to determine the amount of occurrences
+     * of the given element in the array.
+     *
+     * @param arr  The int array to search through.
+     * @param elem The int to look for.
+     *
+     * @return The num of occurrences of the element in the array.
+     */
+    public static <V> int count(int[] arr, Integer elem) {
+        if (elem == null) return 0;
+        int amt = 0;
+        for (int i : arr) {
+            if (i == elem) amt++;
+        }
+        return amt;
+    }
+
+    /**
+     * Performs a linear search to determine the amount of occurrences
+     * of the given element in the array.
+     *
+     * @param arr  The long array to search through.
+     * @param elem The long to look for.
+     *
+     * @return The num of occurrences of the element in the array.
+     */
+    public static int count(long[] arr, Long elem) {
+        if (elem == null) return 0;
+        int amt = 0;
+        for (long l : arr) {
+            if (l == elem) amt++;
+        }
+        return amt;
+    }
+
+    /**
+     * Performs a linear search to determine the amount of occurrences
+     * of the given element in the array.
+     *
+     * @param arr  The float array to search through.
+     * @param elem The float to look for.
+     *
+     * @return The num of occurrences of the element in the array.
+     */
+    public static int count(float[] arr, Float elem) {
+        if (elem == null) return 0;
+        int amt = 0;
+        for (float f : arr) {
+            if (f == elem) amt++;
+        }
+        return amt;
+    }
+
+    /**
+     * Performs a linear search to determine the amount of occurrences
+     * of the given element in the array.
+     *
+     * @param arr  The double array to search through.
+     * @param elem The double to look for.
+     *
+     * @return The num of occurrences of the element in the array.
+     */
+    public static int count(double[] arr, Double elem) {
+        if (elem == null) return 0;
+        int amt = 0;
+        for (double d : arr) {
+            if (d == elem) amt++;
+        }
+        return amt;
+    }
+    
     
 }
