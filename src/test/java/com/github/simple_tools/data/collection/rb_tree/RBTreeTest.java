@@ -24,8 +24,8 @@ import com.github.simple_tools.AbstractTest;
 import com.github.simple_tools.data.array.ArrayTools;
 
 import lombok.AllArgsConstructor;
-
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -378,12 +378,12 @@ public class RBTreeTest
      */
     @Test
     public void genRandom() {
-        runAndWait(() -> genRandom(10_000, 500, 1, RBTree.class), 32, 5_000);
-        runAndWait(() -> genRandom(10_000, 500, 100, RBTree.class), 32, 5_000);
-        runAndWait(() -> genRandom(250_000, 4000, 50, RBTree.class), 4, 20_000);
-        runAndWait(() -> genRandom(10_000, 500, 1, LinkedRBTree.class), 32, 5_000);
-        runAndWait(() -> genRandom(10_000, 500, 100, LinkedRBTree.class), 32, 5_000);
-        runAndWait(() -> genRandom(250_000, 4000, 50, LinkedRBTree.class), 4, 20_000);
+        runAndWait(() -> genRandom(10_000, 500, 1, RBTree.class), 32, 10_000);
+        runAndWait(() -> genRandom(10_000, 500, 100, RBTree.class), 32, 10_000);
+        runAndWait(() -> genRandom(250_000, 4000, 50, RBTree.class), 4, 40_000);
+        runAndWait(() -> genRandom(10_000, 500, 1, LinkedRBTree.class), 32, 10_000);
+        runAndWait(() -> genRandom(10_000, 500, 100, LinkedRBTree.class), 32, 10_000);
+        runAndWait(() -> genRandom(250_000, 4000, 50, LinkedRBTree.class), 4, 40_000);
     }
     
     /**
@@ -409,10 +409,8 @@ public class RBTreeTest
         for (int i = 0; i < remAmt; i++) {
             rem[i] = add[ThreadLocalRandom.current().nextInt(addAmt)];
         }
-        ArrayTools.shuffle(add);
-        ArrayTools.shuffle(rem);
-        Set<Key> addSet = new HashSet<>(ArrayTools.toList(add));
-        Set<Key> remSet = new HashSet<>(ArrayTools.toList(rem));
+        Set<Key> addSet = new HashSet<>(ArrayTools.toList(ArrayTools.shuffle(add)));
+        Set<Key> remSet = new HashSet<>(ArrayTools.toList(ArrayTools.shuffle(rem)));
         //System.out.println("removed!");
         
         //LinkedRBTree<Key> tree = new LinkedRBTree<>(Arrays.asList(add));
@@ -524,8 +522,7 @@ public class RBTreeTest
             min = Math.min(min, arr[i]);
             max = Math.max(max, arr[i]);
         }
-        ArrayTools.shuffle(arr);
-        final RBTree<Integer> tree = new RBTree<>(Integer::compare, arr);
+        final RBTree<Integer> tree = new RBTree<>(Integer::compare, ArrayTools.shuffle(arr));
         
         assertNotNull(tree.getRoot());
         
@@ -549,8 +546,7 @@ public class RBTreeTest
             min = (arr[i].i < min.i ? arr[i] : min);
             max = (arr[i].i > max.i ? arr[i] : max);
         }
-        ArrayTools.shuffle(arr);
-        final LinkedRBTree<Key> tree = new LinkedRBTree<>(Key.COMPARATOR, Arrays.asList(arr));
+        final LinkedRBTree<Key> tree = new LinkedRBTree<>(Key.COMPARATOR, Arrays.asList(ArrayTools.shuffle(arr)));
         
         final Key root = tree.getRoot();
         assertNotNull(root);
@@ -617,8 +613,7 @@ public class RBTreeTest
             arr[i] = 4 * i + 6;
         }
         
-        ArrayTools.shuffle(arr);
-        RBTree<Integer> tree = new RBTree<>(Integer::compare, arr);
+        RBTree<Integer> tree = new RBTree<>(Integer::compare, ArrayTools.shuffle(arr));
         
         runAndWait(() -> {
             final int target = arr[ThreadLocalRandom.current().nextInt(arr.length)];
@@ -652,9 +647,8 @@ public class RBTreeTest
         for (int i = 0; i < amt; i++) {
             arr[i] = new Key(4 * i + 6, 0);
         }
-
-        ArrayTools.shuffle(arr);
-        LinkedRBTree<Key> tree = new LinkedRBTree<>(Key.COMPARATOR, arr);
+        
+        LinkedRBTree<Key> tree = new LinkedRBTree<>(Key.COMPARATOR, ArrayTools.shuffle(arr));
 
         runAndWait(() -> {
             final Key target = arr[ThreadLocalRandom.current().nextInt(arr.length)];
@@ -693,8 +687,7 @@ public class RBTreeTest
         }
         Key[] order = new Key[amt];
         System.arraycopy(arr, 0, order, 0, amt);
-        ArrayTools.shuffle(arr);
-        final LinkedRBTree<Key> tree = new LinkedRBTree<>(Key.COMPARATOR, Arrays.asList(arr));
+        final LinkedRBTree<Key> tree = new LinkedRBTree<>(Key.COMPARATOR, Arrays.asList(ArrayTools.shuffle(arr)));
 
         {
             ListIterator<Key> it = tree.listIterator(true);
@@ -734,8 +727,7 @@ public class RBTreeTest
         }
         Key[] orderExp = new Key[amt];
         System.arraycopy(arr, 0, orderExp, 0, amt);
-        ArrayTools.shuffle(arr);
-        LinkedRBTree<Key> tree = new LinkedRBTree<>(Key.COMPARATOR, arr);
+        LinkedRBTree<Key> tree = new LinkedRBTree<>(Key.COMPARATOR, ArrayTools.shuffle(arr));
         
         Object[] order0 = tree.toArray();
         Key[] order1 = tree.toArray(new Key[0]);
@@ -757,8 +749,7 @@ public class RBTreeTest
         for (int i = 0; i < amt; i++) {
             arr[i] = new Key(4 * i + 6, 0);
         }
-        ArrayTools.shuffle(arr);
-        LinkedRBTree<Key> tree1 = new LinkedRBTree<>(Key.COMPARATOR, arr);
+        LinkedRBTree<Key> tree1 = new LinkedRBTree<>(Key.COMPARATOR, ArrayTools.shuffle(arr));
         tree1.toString();
         tree1.debug();
         RBTree<Key> tree2 = new RBTree<>(Key.COMPARATOR, arr);

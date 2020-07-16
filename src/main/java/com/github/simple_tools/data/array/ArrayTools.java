@@ -16,6 +16,7 @@
 
 package com.github.simple_tools.data.array;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
@@ -332,49 +333,51 @@ public final class ArrayTools {
      */
     public static void deepToString(StringBuilder sb, Object array, int radix)
             throws IllegalArgumentException {
-        if (array instanceof Object[]) {
-            if (array instanceof Byte[])
-                deepToString(sb, (Byte[]) array, radix);
-            else if (array instanceof Character[])
-                deepToString(sb, (Character[]) array, radix);
-            else if (array instanceof Short[])
-                deepToString(sb, (Short[]) array, radix);
-            else if (array instanceof Integer[])
-                deepToString(sb, (Integer[]) array, radix);
-            else if (array instanceof Long[])
-                deepToString(sb, (Long[]) array, radix);
-            else if (array.getClass().getComponentType().isArray()) {
-                sb.append("[");
-                boolean first = true;
-                for (Object arr : (Object[]) array) {
-                    if (first) first = false;
-                    else sb.append(", ");
-                    deepToString(sb, arr, radix);
-                }
-                sb.append("]");
-                
-            } else {
-                throw new IllegalArgumentException("Type not supported: "
-                        + array.getClass().getComponentType());
-            }
-            
-        } else if (array == null) {
+        if (array == null) {
             sb.append("null");
             
-        } else if (array.getClass().getComponentType().isPrimitive()) {
-            if (array instanceof byte[])
-                deepToString(sb, (byte[]) array, radix);
-            else if (array instanceof char[])
-                deepToString(sb, (char[]) array, radix);
-            else if (array instanceof short[])
-                deepToString(sb, (short[]) array, radix);
-            else if (array instanceof int[])
-                deepToString(sb, (int[]) array, radix);
-            else if (array instanceof long[])
-                deepToString(sb, (long[]) array, radix);
-            else {
-                throw new IllegalArgumentException("Type not supported: "
-                        + array.getClass().getComponentType());
+        } else if (array.getClass().isArray()) { // {@code array} is an array.
+            if (array instanceof Object[]) {
+                if (array instanceof Byte[])
+                    deepToString(sb, (Byte[]) array, radix);
+                else if (array instanceof Character[])
+                    deepToString(sb, (Character[]) array, radix);
+                else if (array instanceof Short[])
+                    deepToString(sb, (Short[]) array, radix);
+                else if (array instanceof Integer[])
+                    deepToString(sb, (Integer[]) array, radix);
+                else if (array instanceof Long[])
+                    deepToString(sb, (Long[]) array, radix);
+                else if (array.getClass().getComponentType().isArray()) {
+                    sb.append("[");
+                    boolean first = true;
+                    for (Object arr : (Object[]) array) {
+                        if (first) first = false;
+                        else sb.append(", ");
+                        deepToString(sb, arr, radix);
+                    }
+                    sb.append("]");
+
+                } else {
+                    throw new IllegalArgumentException("Type not supported: "
+                            + array.getClass().getComponentType());
+                }
+
+            } else if (array.getClass().getComponentType().isPrimitive()) {
+                if (array instanceof byte[])
+                    deepToString(sb, (byte[]) array, radix);
+                else if (array instanceof char[])
+                    deepToString(sb, (char[]) array, radix);
+                else if (array instanceof short[])
+                    deepToString(sb, (short[]) array, radix);
+                else if (array instanceof int[])
+                    deepToString(sb, (int[]) array, radix);
+                else if (array instanceof long[])
+                    deepToString(sb, (long[]) array, radix);
+                else {
+                    throw new IllegalArgumentException("Type not supported: "
+                            + array.getClass().getComponentType());
+                }
             }
             
         } else { // {@code array} is not an array.
@@ -658,37 +661,38 @@ public final class ArrayTools {
     /**
      * Returns the length of the specified array object, as an {@code int}.
      *
-     * @param array The array
+     * @param array The array.
      * 
-     * @return The length of the array
+     * @return The length of the array.
      * 
-     * @throws IllegalArgumentException If the object argument is not an array
+     * @throws IllegalArgumentException If the object argument is not an array.
+     * @throws NullPointerException If the argument is {@code null}.
      * 
      * @see java.lang.reflect.Array#getLength(Object) &nbsp reflect entry point.
      */
     public static int length(Object array)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, NullPointerException {
         if (array instanceof Object[])
             return ((Object[]) array).length;
-        else if (array instanceof boolean[])
+        if (array instanceof boolean[])
             return ((boolean[]) array).length;
-        else if (array instanceof byte[])
+        if (array instanceof byte[])
             return ((byte[]) array).length;
-        else if (array instanceof char[])
+        if (array instanceof char[])
             return ((char[]) array).length;
-        else if (array instanceof short[])
+        if (array instanceof short[])
             return ((short[]) array).length;
-        else if (array instanceof int[])
+        if (array instanceof int[])
             return ((int[]) array).length;
-        else if (array instanceof long[])
+        if (array instanceof long[])
             return ((long[]) array).length;
-        else if (array instanceof float[])
+        if (array instanceof float[])
             return ((float[]) array).length;
-        else if (array instanceof double[])
+        if (array instanceof double[])
             return ((double[]) array).length;
-        else if (array == null)
+        if (array == null)
             throw new NullPointerException("Array is null!");
-        else if (!array.getClass().isArray())
+        if (!array.getClass().isArray())
             throw new IllegalArgumentException("Argument is not an array!");
         throw new IllegalStateException();
     }
@@ -721,25 +725,25 @@ public final class ArrayTools {
             throws IllegalArgumentException {
         if (array instanceof Object[])
             return (T) ((Object[]) array)[index];
-        else if (array instanceof boolean[])
+        if (array instanceof boolean[])
             return (T) (Boolean) ((boolean[]) array)[index];
-        else if (array instanceof byte[])
+        if (array instanceof byte[])
             return (T) (Byte) ((byte[]) array)[index];
-        else if (array instanceof short[])
+        if (array instanceof short[])
             return (T) (Short) ((short[]) array)[index];
-        else if (array instanceof char[])
+        if (array instanceof char[])
             return (T) (Character) ((char[]) array)[index];
-        else if (array instanceof int[])
+        if (array instanceof int[])
             return (T) (Integer) ((int[]) array)[index];
-        else if (array instanceof long[])
+        if (array instanceof long[])
             return (T) (Long) ((long[]) array)[index];
-        else if (array instanceof float[])
+        if (array instanceof float[])
             return (T) (Float) ((float[]) array)[index];
-        else if (array instanceof double[])
+        if (array instanceof double[])
             return (T) (Double) ((double[]) array)[index];
-        else if (array == null)
+        if (array == null)
             throw new NullPointerException("Array is null!");    
-        else if (!array.getClass().isArray())
+        if (!array.getClass().isArray())
             throw new IllegalArgumentException("Argument is not an array!");
         throw new IllegalStateException();
     }
@@ -793,7 +797,8 @@ public final class ArrayTools {
             throw new NullPointerException("Array is null!");    
         else if (!array.getClass().isArray())
             throw new IllegalArgumentException("Argument is not an array!");
-        throw new IllegalStateException();
+        else
+            throw new IllegalStateException();
     }
     
     
@@ -871,7 +876,7 @@ public final class ArrayTools {
      *
      * @return A write-through list representation of the provided array.
      */
-    public static List<Boolean> asList(final boolean[] arr) {
+    public static List<Boolean> asList(final boolean... arr) {
         return new ReadOnlyArrayList<>() {
             @Override
             public int size() {
@@ -905,7 +910,7 @@ public final class ArrayTools {
      *
      * @return A write-through list representation of the provided array.
      */
-    public static List<Byte> asList(final byte[] arr) {
+    public static List<Byte> asList(final byte... arr) {
         return new ReadOnlyArrayList<>() {
             @Override
             public int size() {
@@ -939,7 +944,7 @@ public final class ArrayTools {
      *
      * @return A write-through list representation of the provided array.
      */
-    public static List<Character> asList(final char[] arr) {
+    public static List<Character> asList(final char... arr) {
         return new ReadOnlyArrayList<>() {
             @Override
             public int size() {
@@ -973,7 +978,7 @@ public final class ArrayTools {
      *
      * @return A write-through list representation of the provided array.
      */
-    public static List<Short> asList(final short[] arr) {
+    public static List<Short> asList(final short... arr) {
         return new ReadOnlyArrayList<>() {
             @Override
             public int size() {
@@ -1007,7 +1012,7 @@ public final class ArrayTools {
      *
      * @return A write-through list representation of the provided array.
      */
-    public static List<Integer> asList(final int[] arr) {
+    public static List<Integer> asList(final int... arr) {
         return new ReadOnlyArrayList<>() {
             @Override
             public int size() {
@@ -1041,7 +1046,7 @@ public final class ArrayTools {
      *
      * @return A write-through list representation of the provided array.
      */
-    public static List<Long> asList(final long[] arr) {
+    public static List<Long> asList(final long... arr) {
         return new ReadOnlyArrayList<>() {
             @Override
             public int size() {
@@ -1075,7 +1080,7 @@ public final class ArrayTools {
      *
      * @return A write-through list representation of the provided array.
      */
-    public static List<Float> asList(final float[] arr) {
+    public static List<Float> asList(final float... arr) {
         return new ReadOnlyArrayList<>() {
             @Override
             public int size() {
@@ -1109,7 +1114,7 @@ public final class ArrayTools {
      *
      * @return A write-through list representation of the provided array.
      */
-    public static List<Double> asList(final double[] arr) {
+    public static List<Double> asList(final double... arr) {
         return new ReadOnlyArrayList<>() {
             @Override
             public int size() {
@@ -1309,9 +1314,102 @@ public final class ArrayTools {
     
     
     /* ------------------------------------------------------------------------
-     * Copy functions.
+     * New instance functions.
      * ------------------------------------------------------------------------
      */
+    /**
+     * Creates a new array which has the same type and size as the given array. <br>
+     * Similar to: <br>
+     * {@code Array.newInstance(arr.getClass().getComponentType(), Array.getLength(arr))}
+     * 
+     * @param arr The array to get the type and size from. 
+     * @param <A> The type of the array.
+     * 
+     * @return A new array with the same type and size as the given array.
+     */
+    @SuppressWarnings("unchecked")
+    public static <A> A newInstanceOf(A arr) {
+        if (arr == null)
+            return null;
+        else if (!arr.getClass().isArray())
+            throw new IllegalArgumentException("The provided object is not an array!");
+        else
+            return (A) Array.newInstance(arr.getClass().getComponentType(), length(arr));
+    }
+    /**
+     * Creates a new array which has the same type as the given array, and the
+     * given length as length. <br>
+     * Similar to: <br>
+     * {@code Array.newInstance(arr.getClass().getComponentType(), length)}
+     * 
+     * @param arr    The array to get the type from.
+     * @param length The length of the new array.
+     * @param <A>    The type of the array.
+     *
+     * @return A new array with the same type as the given array, but with the
+     *         given length as length.
+     */
+    @SuppressWarnings("unchecked")
+    public static <A> A newInstanceOf(A arr, int length) {
+        if (arr == null)
+            return null;
+        else if (!arr.getClass().isArray())
+            throw new IllegalArgumentException("The provided object is not an array!");
+        else
+            return (A) Array.newInstance(arr.getClass().getComponentType(), length);
+    }
+    
+    
+    /* ------------------------------------------------------------------------
+     * Copy/clone functions.
+     * ------------------------------------------------------------------------
+     */
+    /**
+     * Creates a new array with the same type and length as the provided source array,
+     * and copies all elements from the source array to it.
+     *
+     * @param src The source array.
+     * @param <V> The type of the destination array.
+     *
+     * @return The elements from {@code src} copied to newly created array with the same
+     *         type and length as the source array.
+     *
+     * @see #copyOf(Object, Object)
+     * @see #copyOf(Object, int, Object, int)
+     * @see #copyOf(Object, int, Object, int, int)
+     */
+    public static <V> V copyOf(V src) {
+        if (src == null)
+            throw new NullPointerException();
+        if (!src.getClass().isArray())
+            throw new IllegalArgumentException("Argument is not an array!");
+        return copyOf(src, newInstanceOf(src));
+    }
+    
+    /**
+     * Creates a new array with the same type and length as the provided source array,
+     * and copies all elements from the source array to it.
+     *
+     * @param src The source array.
+     * @param <V> The type of the destination array.
+     *
+     * @return The elements from {@code src} copied to newly created array with the same
+     *         type and length as the source array.
+     *
+     * @see #copyOf(Object, Object)
+     * @see #copyOf(Object, int, Object, int)
+     * @see #copyOf(Object, int, Object, int, int)
+     */
+    public static <V> V copyOf(V src, int dstLength, int offSrc, int offDst, int len) {
+        if (src == null)
+            throw new NullPointerException();
+        if (!src.getClass().isArray())
+            throw new IllegalArgumentException("Given object is not an array!");
+        if (dstLength < offDst + len)
+            throw new IllegalArgumentException("Given boundary lies outside the destination array.");
+        return copyOf(src, offSrc, newInstanceOf(src, dstLength), offDst, len);
+    }
+    
     /**
      * Copies any typed source array {@code src} to the destination array {@code dst}. <br>
      * The number of elements copied is equal to the minimum of the length of both arrays. <br>
@@ -1322,6 +1420,7 @@ public final class ArrayTools {
      * 
      * @param src The source array.
      * @param dst The destination array.
+     * @param <V> The type of the destination array.
      * 
      * @return The elements from {@code src} copied to {@code dst}.
      * 
@@ -1341,6 +1440,7 @@ public final class ArrayTools {
      * @param dst The destination array.
      * @param offSrc The offset to start copying elements from the source array.
      * @param len The number of elements to copy.
+     * @param <V> The type of the destination array.
      * 
      * @return The elements from {@code src} copied to {@code dst}.
      * 
@@ -1361,16 +1461,24 @@ public final class ArrayTools {
      * @param offSrc The offset to start copying elements from the source array.
      * @param offDst The offset to start writing elements to the destination array.
      * @param len The number of elements to copy.
+     * @param <V> The type of the destination array.
      * 
      * @return The elements from {@code src} copied to {@code dst}.
      */
     @SuppressWarnings("MismatchedReadAndWriteOfArray") // Indirect read/writes due to array casting.
     public static <V> V copyOf(Object src, int offSrc, V dst, int offDst, int len) {
-        if (src == null || dst == null) throw new NullPointerException();
+        if (src == null || dst == null)
+            throw new NullPointerException();
         if (!src.getClass().isArray() || !dst.getClass().isArray())
             throw new IllegalArgumentException("Argument is not an array!");
         if (len < 0)
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Negative length");
+        if (offSrc < 0 || offSrc + len > length(src))
+            throw new IllegalArgumentException("Given boundary lies outside the source array.");
+        if (offDst < 0 || offDst + len > length(dst))
+            throw new IllegalArgumentException("Given boundary lies outside the destination array.");
+        if (len == 0)
+            return dst;
         
         final Class<?> compTypeSrc = src.getClass().getComponentType();
         final Class<?> compTypeDst = dst.getClass().getComponentType();
@@ -1513,6 +1621,158 @@ public final class ArrayTools {
         return dst;
     }
     
+//    @SuppressWarnings("unchecked")
+//    public static <A> A deepClone(A arr) {
+//        if (arr == null) {
+//            return null;
+//            
+//        } else if (arr.getClass().isArray()) {
+//            if (arr.getClass().getComponentType().isArray()) { // 2+D array.
+//                final int length = ArrayTools.length(arr);
+//                final A copy = (A) Array.newInstance(arr.getClass().getComponentType(), length);
+//                for (int i = 0; i < length; i++) {
+//                    set(copy, i, deepClone((Object) get(arr, i)));
+//                }
+//
+//            } else { // 1D array.
+//                if (arr.getClass().getComponentType().isPrimitive()) {
+//                    if (arr instanceof boolean[]) 
+//                        return (A) deepClone((boolean[]) arr);
+//                    else if (arr instanceof byte[])
+//                        return (A) deepClone((byte[]) arr);
+//                    else if (arr instanceof char[])
+//                        return (A) deepClone((char[]) arr);
+//                    else if (arr instanceof short[])
+//                        return (A) deepClone((short[]) arr);
+//                    else if (arr instanceof int[])
+//                        return (A) deepClone((int[]) arr);
+//                    else if (arr instanceof long[])
+//                        return (A) deepClone((long[]) arr);
+//                    else if (arr instanceof float[])
+//                        return (A) deepClone((float[]) arr);
+//                    else if (arr instanceof double[])
+//                        return (A) deepClone((double[]) arr);
+//                    throw new IllegalStateException();
+//                    
+//                } else {
+//                    if (arr instanceof Boolean[])
+//                        return (A) deepClone((Boolean[]) arr);
+//                    else if (arr instanceof byte[])
+//                        return (A) deepClone((byte[]) arr);
+//                    else if (arr instanceof char[])
+//                        return (A) deepClone((char[]) arr);
+//                    else if (arr instanceof short[])
+//                        return (A) deepClone((short[]) arr);
+//                    else if (arr instanceof int[])
+//                        return (A) deepClone((int[]) arr);
+//                    else if (arr instanceof long[])
+//                        return (A) deepClone((long[]) arr);
+//                    else if (arr instanceof float[])
+//                        return (A) deepClone((float[]) arr);
+//                    else if (arr instanceof double[])
+//                        return (A) deepClone((double[]) arr);
+//                    throw new IllegalStateException();
+//                }
+//            }
+//            
+//        } else {
+//            return cloneObj(arr);
+//        }
+//        throw new IllegalStateException();
+//    }
+//    
+//    @SuppressWarnings("unchecked")
+//    private static <V> V cloneObj(V obj) {
+//        if (obj instanceof PublicCloneable) {
+//            PublicCloneable<?> pc = (PublicCloneable<?>) obj;
+//            return (V) pc.clone();
+//            
+//        } else {
+//            // TODO: Perform magic here.
+//            throw new UnsupportedOperationException();
+//        }
+//    }
+//    
+//    public static boolean[] deepClone(boolean[] arr) {
+//        if (arr == null) return null;
+//        else return Arrays.copyOf(arr, arr.length);
+//    }
+//
+//    public static byte[] deepClone(byte[] arr) {
+//        if (arr == null) return null;
+//        else return Arrays.copyOf(arr, arr.length);
+//    }
+//
+//    public static char[] deepClone(char[] arr) {
+//        if (arr == null) return null;
+//        else return Arrays.copyOf(arr, arr.length);
+//    }
+//
+//    public static short[] deepClone(short[] arr) {
+//        if (arr == null) return null;
+//        else return Arrays.copyOf(arr, arr.length);
+//    }
+//
+//    public static int[] deepClone(int[] arr) {
+//        if (arr == null) return null;
+//        else return Arrays.copyOf(arr, arr.length);
+//    }
+//
+//    public static long[] deepClone(long[] arr) {
+//        if (arr == null) return null;
+//        else return Arrays.copyOf(arr, arr.length);
+//    }
+//
+//    public static float[] deepClone(float[] arr) {
+//        if (arr == null) return null;
+//        else return Arrays.copyOf(arr, arr.length);
+//    }
+//
+//    public static double[] deepClone(double[] arr) {
+//        if (arr == null) return null;
+//        else return Arrays.copyOf(arr, arr.length);
+//    }
+//    
+//    public static boolean[] deepClone(Boolean[] arr) {
+//        if (arr == null) return null;
+//        else return Arrays.copyOf(arr, arr.length);
+//    }
+//
+//    public static byte[] deepClone(Byte[] arr) {
+//        if (arr == null) return null;
+//        else return Arrays.copyOf(arr, arr.length);
+//    }
+//
+//    public static char[] deepClone(Character[] arr) {
+//        if (arr == null) return null;
+//        else return Arrays.copyOf(arr, arr.length);
+//    }
+//
+//    public static short[] deepClone(Short[] arr) {
+//        if (arr == null) return null;
+//        else return Arrays.copyOf(arr, arr.length);
+//    }
+//
+//    public static int[] deepClone(Integer[] arr) {
+//        if (arr == null) return null;
+//        else return Arrays.copyOf(arr, arr.length);
+//    }
+//
+//    public static long[] deepClone(Long[] arr) {
+//        if (arr == null) return null;
+//        else return Arrays.copyOf(arr, arr.length);
+//    }
+//
+//    public static float[] deepClone(Float[] arr) {
+//        if (arr == null) return null;
+//        else return Arrays.copyOf(arr, arr.length);
+//    }
+//
+//    public static double[] deepClone(Double[] arr) {
+//        if (arr == null) return null;
+//        else return Arrays.copyOf(arr, arr.length);
+//    }
+    
     
     /* ------------------------------------------------------------------------
      * Swap elements functions.
@@ -1545,25 +1805,25 @@ public final class ArrayTools {
             throws ArrayIndexOutOfBoundsException {
         if (arr instanceof Object[])
             return (A) swap((Object[]) arr, i, j);
-        else if (arr instanceof boolean[])
+        if (arr instanceof boolean[])
             return (A) swap((boolean[]) arr, i, j);
-        else if (arr instanceof byte[])
+        if (arr instanceof byte[])
             return (A) swap((byte[]) arr, i, j);
-        else if (arr instanceof short[])
+        if (arr instanceof short[])
             return (A) swap((short[]) arr, i, j);
-        else if (arr instanceof char[])
+        if (arr instanceof char[])
             return (A) swap((char[]) arr, i, j);
-        else if (arr instanceof int[])
+        if (arr instanceof int[])
             return (A) swap((int[]) arr, i, j);
-        else if (arr instanceof long[])
+        if (arr instanceof long[])
             return (A) swap((long[]) arr, i, j);
-        else if (arr instanceof float[])
+        if (arr instanceof float[])
             return (A) swap((float[]) arr, i, j);
-        else if (arr instanceof double[])
+        if (arr instanceof double[])
             return (A) swap((double[]) arr, i, j);
-        else if (arr == null)
+        if (arr == null)
             throw new NullPointerException();
-        else if (!arr.getClass().isArray())
+        if (!arr.getClass().isArray())
             throw new IllegalArgumentException("Object is not an array!");
         throw new IllegalStateException();
     }
@@ -1830,25 +2090,25 @@ public final class ArrayTools {
     public static <A> A shuffle(A arr, Random ran) {
         if (arr instanceof Object[])
             return (A) shuffle((Object[]) arr, ran);
-        else if (arr instanceof boolean[])
+        if (arr instanceof boolean[])
             return (A) shuffle((boolean[]) arr, ran);
-        else if (arr instanceof byte[])
+        if (arr instanceof byte[])
             return (A) shuffle((byte[]) arr, ran);
-        else if (arr instanceof short[])
+        if (arr instanceof short[])
             return (A) shuffle((short[]) arr, ran);
-        else if (arr instanceof char[])
+        if (arr instanceof char[])
             return (A) shuffle((char[]) arr, ran);
-        else if (arr instanceof int[])
+        if (arr instanceof int[])
             return (A) shuffle((int[]) arr, ran);
-        else if (arr instanceof long[])
+        if (arr instanceof long[])
             return (A) shuffle((long[]) arr, ran);
-        else if (arr instanceof float[])
+        if (arr instanceof float[])
             return (A) shuffle((float[]) arr, ran);
-        else if (arr instanceof double[])
+        if (arr instanceof double[])
             return (A) shuffle((double[]) arr, ran);
-        else if (arr == null)
+        if (arr == null)
             throw new NullPointerException();
-        else if (!arr.getClass().isArray())
+        if (!arr.getClass().isArray())
             throw new IllegalArgumentException("Object is not an array!");
         throw new IllegalStateException();
     }
@@ -1897,7 +2157,7 @@ public final class ArrayTools {
      * @see #shuffle(Object, Random)
      * @see #shuffle(boolean[], Random)
      */
-    public static boolean[] shuffle(boolean[] arr) {
+    public static boolean[] shuffle(boolean... arr) {
         return shuffle(arr, ThreadLocalRandom.current());
     }
     
@@ -1930,7 +2190,7 @@ public final class ArrayTools {
      * @see #shuffle(Object, Random)
      * @see #shuffle(byte[], Random)
      */
-    public static byte[] shuffle(byte[] arr) {
+    public static byte[] shuffle(byte... arr) {
         return shuffle(arr, ThreadLocalRandom.current());
     }
     
@@ -1963,7 +2223,7 @@ public final class ArrayTools {
      * @see #shuffle(Object, Random)
      * @see #shuffle(short[], Random)
      */
-    public static short[] shuffle(short[] arr) {
+    public static short[] shuffle(short... arr) {
         return shuffle(arr, ThreadLocalRandom.current());
     }
     
@@ -1996,7 +2256,7 @@ public final class ArrayTools {
      * @see #shuffle(Object, Random)
      * @see #shuffle(char[], Random)
      */
-    public static char[] shuffle(char[] arr) {
+    public static char[] shuffle(char... arr) {
         return shuffle(arr, ThreadLocalRandom.current());
     }
     
@@ -2029,7 +2289,7 @@ public final class ArrayTools {
      * @see #shuffle(Object, Random)
      * @see #shuffle(int[], Random)
      */
-    public static int[] shuffle(int[] arr) {
+    public static int[] shuffle(int... arr) {
         return shuffle(arr, ThreadLocalRandom.current());
     }
     
@@ -2062,7 +2322,7 @@ public final class ArrayTools {
      * @see #shuffle(Object, Random)
      * @see #shuffle(long[], Random)
      */
-    public static long[] shuffle(long[] arr) {
+    public static long[] shuffle(long... arr) {
         return shuffle(arr, ThreadLocalRandom.current());
     }
     
@@ -2095,7 +2355,7 @@ public final class ArrayTools {
      * @see #shuffle(Object, Random)
      * @see #shuffle(float[], Random)
      */
-    public static float[] shuffle(float[] arr) {
+    public static float[] shuffle(float... arr) {
         return shuffle(arr, ThreadLocalRandom.current());
     }
     
@@ -2128,7 +2388,7 @@ public final class ArrayTools {
      * @see #shuffle(Object, Random)
      * @see #shuffle(double[], Random)
      */
-    public static double[] shuffle(double[] arr) {
+    public static double[] shuffle(double... arr) {
         return shuffle(arr, ThreadLocalRandom.current());
     }
     
@@ -2162,7 +2422,7 @@ public final class ArrayTools {
      *
      * @return An array of {@code boolean}s from the original collection.
      */
-    public static boolean[] toBooleanArray(List<Boolean> col) {
+    public static boolean[] toBooleanArray(Collection<Boolean> col) {
         boolean[] arr = new boolean[col.size()];
         int i = 0;
         for (boolean b : col) {
@@ -2396,7 +2656,8 @@ public final class ArrayTools {
             throw new NullPointerException();
         else if (!arr.getClass().isArray())
             throw new IllegalArgumentException("Object is not an array!");
-        throw new IllegalStateException();
+        else
+            throw new IllegalStateException();
     }
     
     /**
@@ -3281,25 +3542,25 @@ public final class ArrayTools {
     public static int indexOf(Object arr, Object elem) {
         if (arr instanceof Object[])
             return indexOf((Object[]) arr, elem);
-        else if (arr instanceof boolean[])
+        if (arr instanceof boolean[])
             return indexOf((boolean[]) arr, (boolean) elem);
-        else if (arr instanceof byte[])
+        if (arr instanceof byte[])
             return indexOf((byte[]) arr, (byte) elem);
-        else if (arr instanceof short[])
+        if (arr instanceof short[])
             return indexOf((short[]) arr, (short) elem);
-        else if (arr instanceof char[])
+        if (arr instanceof char[])
             return indexOf((char[]) arr, (char) elem);
-        else if (arr instanceof int[])
+        if (arr instanceof int[])
             return indexOf((int[]) arr, (int) elem);
-        else if (arr instanceof long[])
+        if (arr instanceof long[])
             return indexOf((long[]) arr, (long) elem);
-        else if (arr instanceof float[])
+        if (arr instanceof float[])
             return indexOf((float[]) arr, (float) elem);
-        else if (arr instanceof double[])
+        if (arr instanceof double[])
             return indexOf((double[]) arr, (double) elem);
-        else if (arr == null)
+        if (arr == null)
             throw new NullPointerException();
-        else if (!arr.getClass().isArray())
+        if (!arr.getClass().isArray())
             throw new IllegalArgumentException("Object is not an array!");
         throw new IllegalStateException();
     }
@@ -3482,25 +3743,25 @@ public final class ArrayTools {
     public static int lastIndexOf(Object arr, Object elem) {
         if (arr instanceof Object[])
             return indexOf((Object[]) arr, elem);
-        else if (arr instanceof boolean[])
+        if (arr instanceof boolean[])
             return indexOf((boolean[]) arr, (boolean) elem);
-        else if (arr instanceof byte[])
+        if (arr instanceof byte[])
             return indexOf((byte[]) arr, (byte) elem);
-        else if (arr instanceof short[])
+        if (arr instanceof short[])
             return indexOf((short[]) arr, (short) elem);
-        else if (arr instanceof char[])
+        if (arr instanceof char[])
             return indexOf((char[]) arr, (char) elem);
-        else if (arr instanceof int[])
+        if (arr instanceof int[])
             return indexOf((int[]) arr, (int) elem);
-        else if (arr instanceof long[])
+        if (arr instanceof long[])
             return indexOf((long[]) arr, (long) elem);
-        else if (arr instanceof float[])
+        if (arr instanceof float[])
             return indexOf((float[]) arr, (float) elem);
-        else if (arr instanceof double[])
+        if (arr instanceof double[])
             return indexOf((double[]) arr, (double) elem);
-        else if (arr == null)
+        if (arr == null)
             throw new NullPointerException();
-        else if (!arr.getClass().isArray())
+        if (!arr.getClass().isArray())
             throw new IllegalArgumentException("Object is not an array!");
         throw new IllegalStateException();
     }
@@ -3679,25 +3940,25 @@ public final class ArrayTools {
     public static int count(Object arr, Object elem) {
         if (arr instanceof Object[])
             return count((Object[]) arr, elem);
-        else if (arr instanceof boolean[])
+        if (arr instanceof boolean[])
             return count((boolean[]) arr, (boolean) elem);
-        else if (arr instanceof byte[])
+        if (arr instanceof byte[])
             return count((byte[]) arr, (byte) elem);
-        else if (arr instanceof short[])
+        if (arr instanceof short[])
             return count((short[]) arr, (short) elem);
-        else if (arr instanceof char[])
+        if (arr instanceof char[])
             return count((char[]) arr, (char) elem);
-        else if (arr instanceof int[])
+        if (arr instanceof int[])
             return count((int[]) arr, (int) elem);
-        else if (arr instanceof long[])
+        if (arr instanceof long[])
             return count((long[]) arr, (long) elem);
-        else if (arr instanceof float[])
+        if (arr instanceof float[])
             return count((float[]) arr, (float) elem);
-        else if (arr instanceof double[])
+        if (arr instanceof double[])
             return count((double[]) arr, (double) elem);
-        else if (arr == null)
+        if (arr == null)
             throw new NullPointerException();
-        else if (!arr.getClass().isArray())
+        if (!arr.getClass().isArray())
             throw new IllegalArgumentException("Object is not an array!");
         throw new IllegalStateException();
     }

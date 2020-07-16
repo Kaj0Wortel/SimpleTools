@@ -16,6 +16,8 @@
 
 package com.github.simple_tools;
 
+import java.util.concurrent.locks.Lock;
+
 public final class MultiTool {
 
     /* ------------------------------------------------------------------------
@@ -109,5 +111,13 @@ public final class MultiTool {
             return " " + "0".repeat(length - text.length()) + text;
     }
     
+    public static void runLock(Lock lock, Runnable r) {
+        lock.lock();
+        try {
+            r.run();
+        } finally {
+            lock.unlock();
+        }
+    }
     
 }

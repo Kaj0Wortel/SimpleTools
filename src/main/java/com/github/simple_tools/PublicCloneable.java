@@ -23,7 +23,7 @@ package com.github.simple_tools;
  * 
  * @author Kaj Wortel
  */
-public interface PublicCloneable
+public interface PublicCloneable<V extends PublicCloneable<V>>
         extends Cloneable {
     
     /**
@@ -31,7 +31,7 @@ public interface PublicCloneable
      * 
      * @see Object#clone()
      */
-    PublicCloneable clone();
+    V clone();
     
     
 }

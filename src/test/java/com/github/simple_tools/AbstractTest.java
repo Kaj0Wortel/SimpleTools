@@ -18,11 +18,11 @@ package com.github.simple_tools;
 
 import com.github.simple_tools.data.array.ArrayTools;
 
-import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Objects;
+import java.util.concurrent.*;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * This is an abstract testing class which should be extended by all testing classes.
@@ -32,6 +32,19 @@ import static org.junit.Assert.fail;
 @SuppressWarnings("unused")
 public abstract class AbstractTest {
 
+    /* ------------------------------------------------------------------------
+     * Constants.
+     * ------------------------------------------------------------------------
+     */
+    /** The fail message for initial values. */
+    private static final String INIT_VALUE_MSG = "Invalid initial value!";
+    
+    /** The maximum number of threads which should be used. */
+    public static final int MAX_THREADS = Math.max(1, Runtime.getRuntime().availableProcessors() / 2);
+    /** The executor used for scheduling tasks. */
+    public static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(MAX_THREADS);
+
+    
     /* ------------------------------------------------------------------------
      * Inner-classes.
      * ------------------------------------------------------------------------
@@ -71,8 +84,11 @@ public abstract class AbstractTest {
             fail("Expected a " + c.getName() + " to be thrown, but it terminated normally.");
 
         } catch (Exception e) {
-            assertTrue("Expected a " + c.getName() + " to be thrown, but a "
-                    + e.getClass().getName() + "was thrown instead.", c.isInstance(e));
+            if (!c.isInstance(e)) {
+                e.printStackTrace();
+                fail("Expected a " + c.getName() + " to be thrown, but a "
+                        + e.getClass().getName() + "was thrown instead:\n");
+            }
         }
     }
 
@@ -183,42 +199,241 @@ public abstract class AbstractTest {
      *
      * @param er     The runnable to run for each thread.
      * @param amt    The amount of threads to spawn.
-     * @param millis The timeout in milliseconds.
+     * @param millis The timeout in milliseconds for each run.
      */
     public static void runAndWait(ExceptionRunner er, int amt, long millis) {
-        Thread ct = Thread.currentThread();
-        AtomicBoolean exceptionOccurred = new AtomicBoolean(false);
-        ThreadGroup tg = new ThreadGroup("runners") {
-            @Override
-            public void uncaughtException(Thread t, Throwable e) {
-                System.err.println(t.getName()+ ": " + System.lineSeparator() +
-                        "  " + Arrays.toString(e.getStackTrace())
-                        .replaceAll(", ", "," + System.lineSeparator() + "  "));
-                ct.interrupt();
-                exceptionOccurred.set(true);
+        Future<?>[] futures = new Future[amt];
+        for (int i = 0; i < amt; i++) {
+            futures[i] = EXECUTOR.submit(wrap(er));
+        }
+        
+        for (Future<?> future : futures) {
+            try {
+                future.get(millis, TimeUnit.MILLISECONDS);
+                
+            } catch (InterruptedException e) {
+                future.cancel(true);
+                e.printStackTrace();
+                fail("One of the runs was interrupted!");
+                
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+                fail("One of the runs has failed!");
+                
+            } catch (TimeoutException e) {
+                future.cancel(true);
+                e.printStackTrace();
+                fail("One of the runs timed out!");
             }
-        };
-        Thread[] threads = new Thread[amt];
-        for (int i = 0; i < amt; i++) {
-            threads[i] = new Thread(tg, wrap(er), "runner " + i);
         }
-        for (int i = 0; i < amt; i++) {
-            threads[i].start();
-        }
-        long start = System.currentTimeMillis();
-        try {
-        for (int i = 0; i < amt; i++) {
-                long timeout = start - System.currentTimeMillis() + millis;
-                if (timeout <= 0) fail("Timed out!");
-                threads[i].join(timeout);
-            }
-        } catch (Throwable e) {
-            fail("One of the runs has failed!");
-        }
-        if (exceptionOccurred.get()) {
-            fail("One of the runs has thrown an exception!");
+
+
+//        Thread ct = Thread.currentThread();
+//        AtomicBoolean exceptionOccurred = new AtomicBoolean(false);
+//        ThreadGroup tg = new ThreadGroup("runners") {
+//            @Override
+//            public void uncaughtException(Thread t, Throwable e) {
+//                System.err.println(t.getName()+ ": " + System.lineSeparator() +
+//                        "  " + Arrays.toString(e.getStackTrace())
+//                        .replaceAll(", ", "," + System.lineSeparator() + "  "));
+//                ct.interrupt();
+//                exceptionOccurred.set(true);
+//            }
+//        };
+//        Thread[] threads = new Thread[amt];
+//        for (int i = 0; i < amt; i++) {
+//            threads[i] = new Thread(tg, () -> {
+//                MultiTool.runLock(THREAD_LOCK, () -> threadCount++);
+//                try {
+//                    wrap(er).run();
+//                    
+//                } finally {
+//                    THREAD_LOCK.lock();
+//                    try {
+//                        if (--threadCount < MAX_THREADS) {
+//                            THREAD_FINISHED.signal();
+//                        }
+//                        
+//                    } finally {
+//                        THREAD_LOCK.unlock();
+//                    }
+//                }
+//            }, "runner " + i);
+//        }
+//        
+//        THREAD_LOCK.lock();
+//        try {
+//            for (int i = 0; i < amt; i++) {
+//                while (threadCount < MAX_THREADS) {
+//                    THREAD_FINISHED.await();
+//                }
+//                threads[i].start();
+//            }
+//            
+//        } catch (Throwable e) {
+//            fail("One of the runs has failed!");
+//            
+//        } finally {
+//            THREAD_LOCK.unlock();
+//        }
+//
+//        long start = System.currentTimeMillis();
+//        try {
+//            for (int i = 0; i < amt; i++) {
+//                long timeout = start - System.currentTimeMillis() + millis;
+//                if (timeout <= 0) fail("Timed out!");
+//                threads[i].join(timeout);
+//            }
+//        } catch (Throwable e) {
+//            fail("One of the runs has failed!");
+//            
+//        } finally {
+//            for (Thread t : threads) {
+//                if (t.isAlive()) {
+//                    t.interrupt();
+//                }
+//            }
+//        }
+    }
+
+    /**
+     * Checks whether the given value is set to the initial value of that type.
+     * 
+     * @param val The value to check.
+     */
+    @SuppressWarnings("SimplifiableJUnitAssertion")
+    protected static void checkInitialValue(Object val) {
+        if (val instanceof Boolean)
+            assertTrue(INIT_VALUE_MSG, !((boolean) val));
+        else if (val instanceof Byte)
+            assertTrue(INIT_VALUE_MSG, (byte) val == 0);
+        else if (val instanceof Character)
+            assertTrue(INIT_VALUE_MSG, (char) val == 0);
+        else if (val instanceof Short)
+            assertTrue(INIT_VALUE_MSG, (short) val == 0);
+        else if (val instanceof Integer)
+            assertTrue(INIT_VALUE_MSG, (int) val == 0);
+        else if (val instanceof Long)
+            assertTrue(INIT_VALUE_MSG, (long) val == 0L);
+        else if (val instanceof Float)
+            assertTrue(INIT_VALUE_MSG, (float) val == 0.0f);
+        else if (val instanceof Double)
+            assertTrue(INIT_VALUE_MSG, (double) val == 0.0);
+        else if (val != null)
+            fail(INIT_VALUE_MSG);
+    }
+
+    /**
+     * Checks whether the given two objects are the same.
+     * Either the objects have the same pointer, or, if the two
+     * objects have a primitive counterpart, have the same value.
+     * 
+     * @param o1 The first object to compare.
+     * @param o2 The second object to compare.
+     */
+    protected static void checkSame(Object o1, Object o2) {
+        if (o1 == o2) return;
+        assertNotNull(o1);
+        assertNotNull(o2);
+        assertEquals(o1.getClass(), o2.getClass());
+        assertTrue(o1 instanceof Boolean ||
+                o1 instanceof Byte ||
+                o1 instanceof Character ||
+                o1 instanceof Short ||
+                o1 instanceof Integer ||
+                o1 instanceof Long ||
+                o1 instanceof Float ||
+                o1 instanceof Double);
+        assertEquals(o1, o2);
+    }
+
+    /**
+     * Switches a primitive typed class to its Object counterpart and vice versa.
+     * Other classes remain unchanged.
+     * 
+     * @param c The class to switch.
+     * 
+     * @return The Object counter part of a primitive class, or vice versa. If no
+     *         primitive part exists, then the same as the input.
+     */
+    protected static Class<?> switchPrimObjClass(Class<?> c) {
+        if (c == null)
+            return c;
+        else if (c.isPrimitive()) {
+            if (Objects.equals(c, Boolean.TYPE))
+                return Boolean.class;
+            else if (Objects.equals(c, Byte.TYPE))
+                return Byte.class;
+            else if (Objects.equals(c, Character.TYPE))
+                return Character.class;
+            else if (Objects.equals(c, Short.TYPE))
+                return Short.class;
+            else if (Objects.equals(c, Integer.TYPE))
+                return Integer.class;
+            else if (Objects.equals(c, Long.TYPE))
+                return Long.class;
+            else if (Objects.equals(c, Float.TYPE))
+                return Float.class;
+            else if (Objects.equals(c, Double.TYPE))
+                return Double.class;
+            else if (Objects.equals(c, Void.TYPE))
+                return Void.class;
+            throw new IllegalStateException();
+            
+        } else {
+            if (Objects.equals(c, Boolean.class))
+                return Boolean.TYPE;
+            else if (Objects.equals(c, Byte.class))
+                return Byte.TYPE;
+            else if (Objects.equals(c, Character.class))
+                return Character.TYPE;
+            else if (Objects.equals(c, Short.class))
+                return Short.TYPE;
+            else if (Objects.equals(c, Integer.class))
+                return Integer.TYPE;
+            else if (Objects.equals(c, Long.class))
+                return Long.TYPE;
+            else if (Objects.equals(c, Float.class))
+                return Float.TYPE;
+            else if (Objects.equals(c, Double.class))
+                return Double.TYPE;
+            else if (Objects.equals(c, Void.class))
+                return Void.TYPE;
+            return c;
         }
     }
 
+    /**
+     * Checks whether the two classes are the same, where each primitive type
+     * and its Object counterpart is regarded as the same. <br>
+     * For example:
+     * <table border=1'>
+     *   <tr><th> Class 1 </th><th> Class 2 </th><th> Result </th></tr>
+     *   <tr><td>{@code Byte}</td><td>{@code Byte}</td><td>{@code OK}</td></tr>
+     *   <tr><td>{@code byte}</td><td>{@code byte}</td><td>{@code OK}</td></tr>
+     *   <tr><td>{@code Byte}</td><td>{@code byte}</td><td>{@code OK}</td></tr>
+     *   <tr><td>{@code byte}</td><td>{@code Byte}</td><td>{@code OK}</td></tr>
+     *   <tr><td>{@code byte[]}</td><td>{@code Byte[]}</td><td>{@code OK}</td></tr>
+     *   <tr><td>{@code byte[]}</td><td>{@code Byte[][]}</td><td>{@code Not OK}</td></tr>
+     *   <tr><td>{@code byte[]}</td><td>{@code int[]}</td><td>{@code Not OK}</td></tr>
+     *   <tr><td>{@code String}</td><td>{@code String}</td><td>{@code OK}</td></tr>
+     * </table>
+     * 
+     * @param c1 The first class to compare.
+     * @param c2 The second class to compare
+     */
+    protected static void checkSameClassPrim(Class<?> c1, Class<?> c2) {
+        if (!Objects.equals(c1, c2)) {
+            assertNotNull(c1);
+            assertNotNull(c2);
+            while (c1.isArray() && c2.isArray()) {
+                c1 = c1.getComponentType();
+                c2 = c2.getComponentType();
+            }
+            
+            assertEquals(c1, switchPrimObjClass(c2));
+        }
+    }
+    
 
 }
