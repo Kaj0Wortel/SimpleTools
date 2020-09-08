@@ -4,6 +4,8 @@ plugins {
     id 'application'
     id 'maven-publish'
 }
+sourceCompatibility = 11
+targetCompatibility = 11
 
 import io.franzbecker.gradle.lombok.task.DelombokTask
 
