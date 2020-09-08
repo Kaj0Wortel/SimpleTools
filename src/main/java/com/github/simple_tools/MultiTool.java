@@ -18,6 +18,11 @@ package com.github.simple_tools;
 
 import java.util.concurrent.locks.Lock;
 
+/**
+ * A collection of various tool functions.
+ * 
+ * @author Kaj Wortel
+ */
 public final class MultiTool {
 
     /* ------------------------------------------------------------------------

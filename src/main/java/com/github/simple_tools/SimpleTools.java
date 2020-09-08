@@ -16,6 +16,15 @@
 
 package com.github.simple_tools;
 
+import com.github.simple_tools.log.Logger;
+import com.github.simple_tools.log.StreamLogger;
+
+/**
+ * @author Kaj Wortel
+ * 
+ * @deprecated This is a class mainly used for development testing. Just ignore this file.
+ */
+@Deprecated
 public class SimpleTools {
     
     public static void main(String[] args) {
