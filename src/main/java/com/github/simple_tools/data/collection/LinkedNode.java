@@ -54,9 +54,7 @@ public interface LinkedNode<N extends LinkedNode<N, K>, K>
      * @return The data of the previous node, or {@code null} if there is no previous node.
      */
     default K getPrevData() {
-        final N prev = getNext();
-        if (prev == null) return null;
-        return prev.getData();
+        return (getPrev() == null ? null : getPrev().getData());
     }
     
     /**
