@@ -16,7 +16,8 @@
 
 package com.github.simple_tools.data.collection.rb_tree;
 
-import java.util.Comparator;
+import com.github.simple_tools.data.collection.LinkedKey;
+import com.github.simple_tools.data.collection.TreeKey;
 
 /**
  * This key class is used for the {@link LinkedRBTree} data structure.
@@ -30,7 +31,8 @@ import java.util.Comparator;
  * @see LinkedRBNode
  * @see LinkedRBTree
  */
-public abstract class LinkedRBKey<D extends LinkedRBKey<D>> {
+public abstract class LinkedRBKey<D extends LinkedRBKey<D>>
+        implements TreeKey<D>, LinkedKey<D> {
     
     /* ------------------------------------------------------------------------
      * Variables.
@@ -64,105 +66,44 @@ public abstract class LinkedRBKey<D extends LinkedRBKey<D>> {
     LinkedRBNode<D> getNode() {
         return node;
     }
-    
-    /**
-     * @return The next element of the chain, or {@code null}
-     *     if this node has no next element.
-     */
-    public D next() {
-        return (node == null ? null : node.getNextData());
-    }
-    
-    /**
-     * @return The previous element of the chain, or {@code null}
-     *     if this node has no previous element.
-     */
+
+    @Override
     public D prev() {
         return (node == null ? null : node.getPrevData());
     }
-    
-    /**
-     * @return The data of its left child in the tree, or {@code null}
-     *     if this node has no left child.
-     */
+
+    @Override
+    public D next() {
+        return (node == null ? null : node.getNextData());
+    }
+
+    @Override
     public D left() {
         if (node == null) return null;
         RBNode<D> left = node.getLeft();
         return (left == null ? null : left.getData());
     }
-    
-    /**
-     * @return The data of its right child in the tree, or {@code null}
-     *     if this node has no right child.
-     */
+
+    @Override
     public D right() {
         if (node == null) return null;
         RBNode<D> right = node.getRight();
         return (right == null ? null : right.getData());
     }
-    
-    /**
-     * @return The data of the parent in the tree, or {@code null}
-     *     if this node has no parent.
-     */
+
+    @Override
     public D parent() {
         if (node == null) return null;
         RBNode<D> parent = node.getParent();
         return (parent == null ? null : parent.getData());
     }
     
-    /**
-     * @return {@code true} if the node of this key has a left child in the tree.
-     *     {@code false} otherwise.
-     */
-    public boolean hasLeft() {
-        return (node != null && node.hasLeft());
-    }
-    
-    /**
-     * @return {@code true} if the node of this key has a right child in the tree.
-     *     {@code false} otherwise.
-     */
-    public boolean hasRight() {
-        return node != null && node.hasRight();
-    }
-    
-    /**
-     * @return {@code true} if the node of this key has a parent in the tree.
-     *     {@code false} otherwise.
-     */
-    public boolean hasParent() {
-        return node != null && node.hasParent();
-    }
-
-    /**
-     * @return {@code true} if the node of this key has a next node in the tree.
-     *     {@code false} otherwise.
-     */
-    public boolean hasPrev() {
-        return node != null && node.hasPrev();
-    }
-
-    /**
-     * @return {@code true} if the node of this key has a previous node in the tree.
-     *     {@code false} otherwise.
-     */
-    public boolean hasNext() {
-        return node != null && node.hasNext();
-    }
-    
-    /**
-     * @return {@code true} if the node of this key represents the root in the tree.
-     *     {@code false} otherwise.
-     */
+    @Override
     public boolean isRoot() {
         return node != null && node.isRoot();
     }
-    
-    /**
-     * @return {@code true} if the node of this key represents a leaf in the tree.
-     *     {@code false} otherwise.
-     */
+
+    @Override
     public boolean isLeaf() {
         return node != null && !node.hasChild();
     }

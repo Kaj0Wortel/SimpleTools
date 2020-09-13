@@ -13,5 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.simple_tools.data.collection;public interface Key {
+package com.github.simple_tools.data.collection;
+
+/**
+ * An interface for the keys used in the {@link com.github.simple_tools.data.collection} package.
+ * 
+ * @author Kaj Wortel
+ */
+public interface Key {
+    
 }

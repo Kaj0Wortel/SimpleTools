@@ -20,6 +20,7 @@ import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.github.simple_tools.data.collection.rb_tree.RBSearch.Choice;
+import lombok.NonNull;
 
 /**
  * Implementation of a red-black tree data structure. It has the following properties:
@@ -61,15 +62,15 @@ public class RBTree<D>
      * Variables.
      * ------------------------------------------------------------------------
      */
-    final private Comparator<D> comparator;
+    protected final Comparator<D> comparator;
     /** The size of the tree. */
-    private int size = 0;
+    protected int size = 0;
     /** The root node of the tree. */
-    private RBNode<D> root;
+    protected RBNode<D> root;
     /** The minimum value of the tree. */
-    private RBNode<D> min;
+    protected RBNode<D> min;
     /** The maximum value of the tree. */
-    private RBNode<D> max;
+    protected RBNode<D> max;
     
     
     /* ------------------------------------------------------------------------
@@ -79,7 +80,7 @@ public class RBTree<D>
     /**
      * Class representing a stack item used for initializing the tree.
      */
-    private static class Elem {
+    protected static class Elem {
         int minIndex;
         int maxIndex;
         int parentIndex;
@@ -492,9 +493,9 @@ public class RBTree<D>
      *
      * @param data The data to insert. Is guaranteed non-null.
      *
-     * @return The inserted node.
+     * @return The inserted node, or {@code null} if no new node was created.
      */
-    protected RBNode<D> bstInsert(D data) {
+    protected RBNode<D> bstInsert(@NonNull D data) {
         if (root == null) {
             (root = min = max = createNode(data)).setColor(RBColor.BLACK);
             return root;
@@ -505,7 +506,7 @@ public class RBTree<D>
         // There are free leaves.
         RBNode<D> node = createNode(data);
         int cmp = comparator.compare(node.getData(), near.getData());
-        if (cmp < 0 || (cmp == 0 && node.hashCode() < near.hashCode())) {
+        if (cmp < 0) {
             // near.getLeft() == null
             setLeft(near, node);
             if (min == near) min = node;
@@ -682,7 +683,7 @@ public class RBTree<D>
                 }
                 // Case is now transformed to case 2 or 3.
                 
-            } else if (s.isBlack() && s.leftIsBlack() && s.rightIsBlack()) {
+            } else if (s.isBlack() && s.isLeftBlack() && s.isRightBlack()) {
                 // CASE 2
                 // x and are black.
                 // s has 2 black children.
@@ -708,7 +709,7 @@ public class RBTree<D>
                 // x and s are black.
                 // s has at least one red child.
                 if (s.isLeft()) {
-                    if (!s.rightIsBlack()) {
+                    if (!s.isRightBlack()) {
                         // Right child is red, left might be red.
                         RBNode<D> right = s.getRight();
                         rotateLeft(s);
@@ -727,7 +728,7 @@ public class RBTree<D>
                     }
                     
                 } else { // Mirror case from above.
-                    if (!s.leftIsBlack()) {
+                    if (!s.isLeftBlack()) {
                         // Left child is red, right might be red.
                         RBNode<D> left = s.getLeft();
                         rotateRight(s);
@@ -908,7 +909,7 @@ public class RBTree<D>
      * @param parent The parent to set the left child for.
      * @param left The child to set the parent for.
      */
-    private void setLeft(RBNode<D> parent, RBNode<D> left) {
+    protected void setLeft(RBNode<D> parent, RBNode<D> left) {
         if (parent != null) parent.setLeft(left);
         if (left != null) left.setParent(parent);
     }
@@ -920,7 +921,7 @@ public class RBTree<D>
      * @param parent The parent to set the right child for.
      * @param right The child to set the parent for.
      */
-    private void setRight(RBNode<D> parent, RBNode<D> right) {
+    protected void setRight(RBNode<D> parent, RBNode<D> right) {
         if (parent != null) parent.setRight(right);
         if (right != null) right.setParent(parent);
     }

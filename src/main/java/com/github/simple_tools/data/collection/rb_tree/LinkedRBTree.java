@@ -45,7 +45,6 @@ import java.util.Comparator;
  * @see LinkedRBKey
  * @see RBTree
  */
-@SuppressWarnings("unused")
 public class LinkedRBTree<D extends LinkedRBKey<D>>
         extends RBTree<D> {
     
@@ -58,7 +57,7 @@ public class LinkedRBTree<D extends LinkedRBKey<D>>
      * 
      * @param comparator The comparator used to compare the elements.
      * 
-     * @see RBTree#RBTree(Comparator);
+     * @see RBTree#RBTree(Comparator)
      */
     public LinkedRBTree(Comparator<D> comparator) {
         super(comparator);
@@ -85,7 +84,6 @@ public class LinkedRBTree<D extends LinkedRBKey<D>>
      * @see RBTree#RBTree(Comparator, Object[])
      */
     @SafeVarargs
-    @SuppressWarnings("JavaDoc")
     public LinkedRBTree(Comparator<D> comparator, D... elems) {
         super(comparator, elems);
     }

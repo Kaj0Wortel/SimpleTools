@@ -16,18 +16,27 @@
 
 package com.github.simple_tools.data.collection.rb_tree;
 
+import com.github.simple_tools.data.collection.LinkedNode;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * This class stores the information about a node in the {@link LinkedRBTree} data structure.
+ *
+ * @param <D> The key value of the node.
  * 
- * @version 1.1
  * @author Kaj Wortel
  * 
  * @see RBNode
  * @see LinkedRBTree
  * @see LinkedRBKey
  */
+@Getter
+@Setter
 public class LinkedRBNode<D extends LinkedRBKey<D>>
-        extends RBNode<D> {
+        extends RBNode<D>
+        implements LinkedNode<LinkedRBNode<D>, D> {
     
     /* ------------------------------------------------------------------------
      * Variables.
@@ -81,65 +90,9 @@ public class LinkedRBNode<D extends LinkedRBKey<D>>
      * Functions.
      * ------------------------------------------------------------------------
      */
-    /**
-     * @param next The new next node of this node.
-     */
-    protected final void setNext(LinkedRBNode<D> next) {
-        this.next = next;
-    }
-    
-    /**
-     * @param prev The new previous node of this node.
-     */
-    protected final void setPrev(LinkedRBNode<D> prev) {
-        this.prev = prev;
-    }
-    
-    /**
-     * @return The next node of this node.
-     */
-    public final LinkedRBNode<D> getNext() {
-        return next;
-    }
-    
-    /**
-     * @return The previous node of this node.
-     */
-    public final LinkedRBNode<D> getPrev() {
-        return prev;
-    }
-    
-    /**
-     * @return {@code true} if this node has a next node. {@code false} otherwise.
-     */
-    public final boolean hasNext() {
-        return next != null;
-    }
-    
-    /**
-     * @return {@code true} if this node has a previous node. {@code false} otherwise.
-     */
-    public final boolean hasPrev() {
-        return prev != null;
-    }
-    
-    /**
-     * @return The data of the next node, or {@code null} if there is no next node.
-     */
-    public final D getNextData() {
-        return (next == null ? null : next.getData());
-    }
-    
-    /**
-     * @return The data of the previous node, or {@code null} if there is no previous node.
-     */
-    public final D getPrevData() {
-        return (prev == null ? null : prev.getData());
-    }
-    
     @Override
     public String toString() {
-        return "Node[" + System.lineSeparator() +
+        return getClass().getSimpleName() + "[" + System.lineSeparator() +
                 "  this  : " + getData() + System.lineSeparator() + 
                 "  color : " + getColor() + System.lineSeparator() + 
                 "  parent: " + (!hasParent() ? "null" : getParent().getData()) + System.lineSeparator() +

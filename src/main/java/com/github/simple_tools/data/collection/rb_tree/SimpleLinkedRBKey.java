@@ -18,26 +18,34 @@ package com.github.simple_tools.data.collection.rb_tree;
 
 import lombok.Getter;
 
-import java.util.Comparator;
 import java.util.Objects;
 
-public class SimpleLinkedRBKey<V>
-        extends LinkedRBKey<SimpleLinkedRBKey<V>> {
+/**
+ * A class for a simple wrapper of the {@link LinkedRBKey}.
+ * 
+ * @param <D> The data type of the key.
+ * 
+ * @author Kaj Wortel
+ * 
+ * @see LinkedRBKey
+ */
+public class SimpleLinkedRBKey<D>
+        extends LinkedRBKey<SimpleLinkedRBKey<D>> {
     
     /* ------------------------------------------------------------------------
      * Variables.
      * ------------------------------------------------------------------------
      */
     @Getter
-    private final V value;
+    private final D data;
     
     
     /* ------------------------------------------------------------------------
      * Constructor.
      * ------------------------------------------------------------------------
      */
-    public SimpleLinkedRBKey(V value) {
-        this.value = value;
+    public SimpleLinkedRBKey(D data) {
+        this.data = data;
     }
 
 
@@ -47,7 +55,7 @@ public class SimpleLinkedRBKey<V>
      */
     @Override
     public String toString() {
-        return Objects.toString(value);
+        return Objects.toString(data);
     }
 
 

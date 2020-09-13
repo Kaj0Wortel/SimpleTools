@@ -15,4 +15,18 @@
  */
 package com.github.simple_tools.data.collection;
 
-public class Node {
+/**
+ * An interface for the nodes used in the {@link com.github.simple_tools.data.collection} package.
+ *
+ * @param <K> The key value of the node.
+ * 
+ * @author Kaj Wortel
+ */
+public interface Node<K> {
+
+    /**
+     * @return The data of the node.
+     */
+    K getData();
+    
+}
