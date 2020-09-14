@@ -17,7 +17,6 @@
 package com.github.simple_tools.data.collection.rb_tree;
 
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
 
 import com.github.simple_tools.data.collection.rb_tree.RBSearch.Choice;
 import lombok.NonNull;
@@ -160,13 +159,13 @@ public class RBTree<D>
     /**
      * Initializes the entire tree with the given nodes. <br>
      * <br>
-     * <b>WARNING</b><br>
+     * <b>NOTE:</b><br>
      * <ul>
      *   <li>This function deletes all previous nodes!</li>
      *   <li>All nodes MUST be sorted!</li>
      * </ul>
      * 
-     * @param <N> The type of the nodes to add.
+     * @param <N>   The type of the nodes to add.
      * @param nodes The array of nodes.
      */
     protected <N extends RBNode<D>> void initTree(N[] nodes) {
@@ -188,7 +187,8 @@ public class RBTree<D>
         while (!stack.isEmpty()) {
             Elem elem = stack.pop();
             if (elem.minIndex == elem.maxIndex) continue;
-            int nodeIndex = (elem.maxIndex + elem.minIndex - ThreadLocalRandom.current().nextInt(2)) / 2;
+//            int nodeIndex = (elem.maxIndex + elem.minIndex - ThreadLocalRandom.current().nextInt(2)) / 2;
+            int nodeIndex = (elem.maxIndex + elem.minIndex) / 2;
             RBNode<D> node = nodes[nodeIndex];
             node.setParent(null);
             node.setLeft(null);
@@ -340,6 +340,7 @@ public class RBTree<D>
      * @return The node with the given value, or {@code null} if no such node exists.
      */
     protected RBNode<D> get(D key) {
+        if (key == null) return null;
         if (isEmpty()) return null;
         RBNode<D> node = getNearest(key);
         if (comparator.compare(node.getData(), key) == 0) return node;
@@ -466,7 +467,7 @@ public class RBTree<D>
     @Override
     public boolean add(D data) {
         if (data == null) throw new NullPointerException();
-        RBNode<D> node = bstInsert(data);
+        RBNode<D> node = bstInsert(data, null);
         if (node == null) return false;
         balanceTreeInsert(node);
         size++;
@@ -492,19 +493,22 @@ public class RBTree<D>
      * The values {@code min}, {@code max} and {@code root} should also be updated here.
      *
      * @param data The data to insert. Is guaranteed non-null.
+     * @param args The arguments used to create a node.
      *
      * @return The inserted node, or {@code null} if no new node was created.
      */
-    protected RBNode<D> bstInsert(@NonNull D data) {
+    protected RBNode<D> bstInsert(@NonNull D data, Object args) {
         if (root == null) {
-            (root = min = max = createNode(data)).setColor(RBColor.BLACK);
+            (root = min = max = createNode(data, args)).setColor(RBColor.BLACK);
             return root;
         }
         
-        RBNode<D> near = getNearest(data);
-        if (comparator.compare(near.getData(), data) == 0) return null;
+        final RBNode<D> near = getNearest(data);
+        if (comparator.compare(near.getData(), data) == 0) {
+            return insertExisting(near, data, args);
+        }
         // There are free leaves.
-        RBNode<D> node = createNode(data);
+        final RBNode<D> node = createNode(data, args);
         int cmp = comparator.compare(node.getData(), near.getData());
         if (cmp < 0) {
             // near.getLeft() == null
@@ -519,6 +523,21 @@ public class RBTree<D>
         
         updateSizeParents(node, 1);
         return node;
+    }
+
+    /**
+     * Function to be used for overriding classes.
+     * It is called when an element is being inserted, but it already exists in the tree.
+     * The default implementation returns {@code null}.
+     * 
+     * @param existing The already existing node.
+     * @param data     The data to insert.
+     * @param args     The arguments used to create a node.
+     * 
+     * @return The inserted node, or {@code null} if there is no such node.
+     */
+    protected RBNode<D> insertExisting(@NonNull RBNode<D> existing, @NonNull D data, Object args) {
+        return null;
     }
     
     /**
@@ -575,8 +594,7 @@ public class RBTree<D>
     @Override
     @SuppressWarnings("unchecked")
     public boolean remove(Object obj) {
-        if (obj == null) throw new NullPointerException();
-        return remove(get((D) obj));
+        return removeNode(get((D) obj), null);
     }
     
     /**
@@ -584,10 +602,11 @@ public class RBTree<D>
      * occurs in the tree.
      * 
      * @param node The node to be removed.
+     * @param args The arguments used for removing the node.
      * 
      * @return {@code true} if the node was removed. {@code false} otherwise.
      */
-    protected boolean remove(RBNode<D> node) {
+    protected boolean removeNode(RBNode<D> node, Object args) {
         bstDelete(node);
         if (node == null) return false;
         balanceTreeDelete(node);
@@ -1001,7 +1020,7 @@ public class RBTree<D>
             {
                 int i = 0;
                 for (D d : col) {
-                    nodes[i++] = createNode(d);
+                    nodes[i++] = createNode(d, null);
                 }
             }
             Arrays.sort(nodes, (n1, n2) -> comparator.compare(n1.getData(), n2.getData()));
@@ -1053,7 +1072,7 @@ public class RBTree<D>
         if (k > 0.5 * (k + 1) * (2 * n - k) * Math.log(n) / LOG2) {
             // Deleting k items is faster.
             for (RBNode<D> node : remove) {
-                remove(node);
+                removeNode(node, null);
             }
         } else {
             // Creating a new tree is faster.
@@ -1124,8 +1143,13 @@ public class RBTree<D>
     /**
      * Creates a new {@link RBNode} from the given data element. Subclasses which
      * want to change the nodes being created should override this function.
+     *
+     * @param data The data to create the node for. Is guaranteed non-null.
+     * @param args The arguments used to create a node.
+     * 
+     * @return A node containing the given data.
      */
-    protected RBNode<D> createNode(D data) {
+    protected RBNode<D> createNode(D data, Object args) {
         return new RBNode<>(data);
     }
     
@@ -1143,7 +1167,7 @@ public class RBTree<D>
     public D poll() {
         if (isEmpty()) return null;
         D data = getMin();
-        remove(min);
+        removeNode(min, null);
         return data;
     }
     
@@ -1157,7 +1181,7 @@ public class RBTree<D>
             throws NoSuchElementException {
         if (isEmpty()) throw new NoSuchElementException();
         D data = getMin();
-        remove(min);
+        removeNode(min, null);
         return data;
     }
     

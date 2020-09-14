@@ -16,9 +16,6 @@
 
 package com.github.simple_tools;
 
-import com.github.simple_tools.log.Logger;
-import com.github.simple_tools.log.StreamLogger;
-
 /**
  * @author Kaj Wortel
  * 

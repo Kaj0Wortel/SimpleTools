@@ -99,8 +99,8 @@ public class LinkedRBTree<D extends LinkedRBKey<D>>
     }
     
     @Override
-    protected boolean remove(RBNode<D> node) {
-        if (super.remove(node)) {
+    protected boolean removeNode(RBNode<D> node, Object args) {
+        if (super.removeNode(node, args)) {
             D data = gd(node);
             if (data != null) data.setNode(null);
             return true;
@@ -118,7 +118,7 @@ public class LinkedRBTree<D extends LinkedRBKey<D>>
     }
     
     @Override
-    protected LinkedRBNode<D> createNode(D data) {
+    protected LinkedRBNode<D> createNode(D data, Object args) {
         return LinkedRBNode.createNode(data);
     }
     
@@ -151,8 +151,8 @@ public class LinkedRBTree<D extends LinkedRBKey<D>>
     }
     
     @Override
-    protected LinkedRBNode<D> bstInsert(D data) {
-        LinkedRBNode<D> node = (LinkedRBNode<D>) super.bstInsert(data);
+    protected LinkedRBNode<D> bstInsert(D data, Object args) {
+        LinkedRBNode<D> node = (LinkedRBNode<D>) super.bstInsert(data, args);
         if (node == null) return null;
         node.getData().setNode(node);
         LinkedRBNode<D> p = (LinkedRBNode<D>) node.getParent();
