@@ -87,9 +87,9 @@ public interface Bag<E>
      *
      * @return {@code true} if the bag was modified. {@code false} otherwise.
      */
-    default <V> boolean removeAll(Bag<V> bag) {
+    default boolean removeAll(Bag<?> bag) {
         boolean mod = false;
-        for (V elem : bag) {
+        for (Object elem : bag) {
             if (remove(elem, bag.count(elem))) {
                 mod = true;
             }
@@ -124,11 +124,10 @@ public interface Bag<E>
      *
      * @return {@code true} if the bag was modified. {@code false} otherwise.
      */
-    @SuppressWarnings("unchecked")
-    default <V> boolean retainAll(Bag<V> bag) {
+    default  boolean retainAll(Bag<?> bag) {
         Map<E, Integer> removeMap = new HashMap<>();
         for (E elem : this) {
-            int otherCount = bag.count((V) elem);
+            int otherCount = bag.count(elem);
             if (otherCount == 0) {
                 removeMap.put(elem, Integer.MAX_VALUE);
             } else {

@@ -16,8 +16,9 @@
 package com.github.simple_tools.data.collection;
 
 import com.github.simple_tools.AbstractTest;
+import com.github.simple_tools.data.collection.rb_tree.LinkedRBTreeBag;
 import com.github.simple_tools.data.collection.rb_tree.RBTreeBag;
-import com.github.simple_tools.data.collection.rb_tree.HashBag;
+import com.github.simple_tools.data.collection.rb_tree.SimpleLinkedRBBagKey;
 import com.github.simple_tools.data.containers.Pair;
 import org.junit.Test;
 
@@ -36,8 +37,14 @@ public class BagTest
     
     protected List<Bag<Integer>> createBags() {
         return List.of(
+                new HashBag<>(),
                 new RBTreeBag<>(Integer::compareTo),
-                new HashBag<>()
+                new BagFunction<SimpleLinkedRBBagKey<Integer>, Integer>(
+                        new LinkedRBTreeBag<SimpleLinkedRBBagKey<Integer>>(
+                                Comparator.comparingInt(SimpleLinkedRBBagKey::getData)),
+                        SimpleLinkedRBBagKey::new,
+                        SimpleLinkedRBBagKey::getData
+                )
         );
     }
     

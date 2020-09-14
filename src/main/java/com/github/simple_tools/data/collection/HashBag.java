@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.simple_tools.data.collection.rb_tree;
-
-import com.github.simple_tools.data.collection.Bag;
+package com.github.simple_tools.data.collection;
 
 import java.util.*;
 

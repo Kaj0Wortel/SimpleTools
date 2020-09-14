@@ -35,6 +35,7 @@ public class RBTreeBag<D>
      * Variables.
      * ------------------------------------------------------------------------
      */
+    /** The bagSize of the bag. */
     protected int bagSize = 0;
     
 
@@ -197,10 +198,23 @@ public class RBTreeBag<D>
     
     @Override
     protected RBBagNode<D> createNode(@NonNull D data, Object args) {
-        return new RBBagNode<>(data, (args instanceof Integer ? (int) args : 1));
+        return createNode(data, (args == null ? 1 : (int) args));
+    }
+
+    /**
+     * Creates a new node using the given data and amount.
+     * 
+     * @param data The data to create the node for.
+     * @param amt  The amount of elements the node should have.
+     * 
+     * @return A new node with the given data and amount.
+     */
+    protected RBBagNode<D> createNode(@NonNull D data, int amt) {
+        return new RBBagNode<>(data, amt);
     }
     
     @Override
+    @SuppressWarnings("unchecked")
     public int count(Object data) {
         RBBagNode<D> node = (RBBagNode<D>) get((D) data);
         if (node == null) return 0;
