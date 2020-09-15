@@ -103,6 +103,14 @@ public class LinkedRBBagKey<D extends LinkedRBBagKey<D>>
     public boolean isLeaf() {
         return node != null && !node.hasChild();
     }
+
+    /**
+     * @return The amount of nodes in the subtree starting at this node,
+     *     including this node.
+     */
+    public int getSize() {
+        return (node == null ? 0 : node.getSize());
+    }
     
     
 }

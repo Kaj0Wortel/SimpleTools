@@ -52,7 +52,6 @@ public class RBNode<D>
     /** The right node of this node in the tree. */
     protected RBNode<D> right = null;
     /** The size of the subtree. */
-    @Getter(AccessLevel.NONE)
     protected int size = 1;
     /** The data element of this node. */
     final private D data;

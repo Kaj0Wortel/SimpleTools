@@ -36,6 +36,7 @@ public class SimpleLinkedRBBagKey<D>
      * Variables.
      * ------------------------------------------------------------------------
      */
+    /** The data object for the key. */
     @Getter
     private final D data;
 
@@ -43,6 +44,11 @@ public class SimpleLinkedRBBagKey<D>
     /* ------------------------------------------------------------------------
      * Constructor.
      * ------------------------------------------------------------------------
+     */
+    /**
+     * Creates a new simple linked red-black bag key using the given data.
+     * 
+     * @param data The data of the key.
      */
     public SimpleLinkedRBBagKey(D data) {
         this.data = data;
