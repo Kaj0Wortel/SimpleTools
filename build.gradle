@@ -17,7 +17,7 @@ repositories {
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile 'junit:junit:4.12'
 
     compileOnly 'org.projectlombok:lombok:1.18.12'
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
@@ -70,3 +70,21 @@ javadoc {
 jar {
     baseName 'simpletools'
 }
+
+task zipSrc(type: Zip) {
+    baseName 'simpletools'
+    dependsOn clean
+    from 'src'
+    archiveName "${baseName}-${version}.zip"
+}
+
+task export(type: Copy) {
+    dependsOn clean
+    dependsOn jar
+    dependsOn zipSrc
+    dependsOn javadoc
+    
+    from 'build/libs', 'build/docs', 'build/distributions'
+    into 'build/export'
+}
+

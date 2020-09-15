@@ -312,8 +312,7 @@ public class RBTree<D>
      */
     public <V extends Comparable<D>> D binarySearch(V target) {
         RBNode<D> node = root;
-        while (true) {
-            if (node == null) return null;
+        while (node != null) {
             int cmp = target.compareTo(gd(node));
             if (cmp < 0) {
                 node = node.getLeft();
@@ -323,6 +322,7 @@ public class RBTree<D>
                 return gd(node);
             }
         }
+        return null;
     }
     
     /**
@@ -340,9 +340,8 @@ public class RBTree<D>
      * @return The node with the given value, or {@code null} if no such node exists.
      */
     protected RBNode<D> get(D key) {
-        if (key == null) return null;
-        if (isEmpty()) return null;
-        RBNode<D> node = getNearest(key);
+        if (key == null || root == null) return null;
+        final RBNode<D> node = getNearest(key);
         if (comparator.compare(node.getData(), key) == 0) return node;
         else return null;
     }
@@ -358,7 +357,7 @@ public class RBTree<D>
         RBNode<D> prev = null;
         while (node != null) {
             prev = node;
-            int cmp = comparator.compare(key, node.getData());
+            final int cmp = comparator.compare(key, node.getData());
             if (cmp < 0) node = node.getLeft();
             else if (cmp > 0) node = node.getRight();
             else return node;
