@@ -93,7 +93,8 @@ public class LinkedRBNode<D extends LinkedRBKey<D>>
     @Override
     public String toString() {
         return getClass().getSimpleName() + "[" + System.lineSeparator() +
-                "  this  : " + getData() + System.lineSeparator() + 
+                "  this  : " + getData() + System.lineSeparator() +
+                "  size  : " + getSize() + System.lineSeparator() +
                 "  color : " + getColor() + System.lineSeparator() + 
                 "  parent: " + (!hasParent() ? "null" : getParent().getData()) + System.lineSeparator() +
                 "  left  : " + (!hasLeft() ? "null" : getLeft().getData()) + System.lineSeparator() +

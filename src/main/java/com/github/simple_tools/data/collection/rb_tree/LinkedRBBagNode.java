@@ -90,15 +90,17 @@ public class LinkedRBBagNode<D extends LinkedRBBagKey<D>>
      */
     @Override
     public String toString() {
-        return "Node[" + System.lineSeparator() +
-                "  this  : " + getData() + System.lineSeparator() +
-                "  count : " + getCount() + System.lineSeparator() +
-                "  color : " + getColor() + System.lineSeparator() +
-                "  parent: " + (!hasParent() ? "null" : getParent().getData()) + System.lineSeparator() +
-                "  left  : " + (!hasLeft() ? "null" : getLeft().getData()) + System.lineSeparator() +
-                "  right : " + (!hasRight() ? "null" : getRight().getData()) + System.lineSeparator() +
-                "  next  : " + (!hasNext() ? "null" : getNext().getData()) + System.lineSeparator() +
-                "  prev  : " + (!hasPrev() ? "null" : getPrev().getData()) + System.lineSeparator() +
+        return getClass().getSimpleName() + "[" + System.lineSeparator() +
+                "  this   : " + getData() + System.lineSeparator() +
+                "  size   : " + getSize() + System.lineSeparator() +
+                "  count  : " + getCount() + System.lineSeparator() +
+                "  bagSize: " + getBagSize() + System.lineSeparator() +
+                "  color  : " + getColor() + System.lineSeparator() +
+                "  parent : " + (!hasParent() ? "null" : getParent().getData()) + System.lineSeparator() +
+                "  left   : " + (!hasLeft() ? "null" : getLeft().getData()) + System.lineSeparator() +
+                "  right  : " + (!hasRight() ? "null" : getRight().getData()) + System.lineSeparator() +
+                "  next   : " + (!hasNext() ? "null" : getNext().getData()) + System.lineSeparator() +
+                "  prev   : " + (!hasPrev() ? "null" : getPrev().getData()) + System.lineSeparator() +
                 "]";
     }
     

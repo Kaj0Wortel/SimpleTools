@@ -23,6 +23,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import com.github.simple_tools.AbstractTest;
 import com.github.simple_tools.data.array.ArrayTools;
 
+import com.github.simple_tools.data.collection.Bag;
+import com.github.simple_tools.data.collection.BagFunction;
 import lombok.AllArgsConstructor;
 import org.junit.Test;
 
@@ -801,6 +803,59 @@ public class RBTreeTest
         expEx(NoSuchElementException.class, tree2::remove);
         assertNull(tree2.peek());
         assertNull(tree2.poll());
+    }
+    
+    @Test
+    public void smallTreeTest() {
+        RBTree<Integer> tree = new RBTree<>(Integer::compareTo);
+        assertTrue(tree.add(0));
+        assertEquals(0, (int) tree.getRoot());
+        assertEquals(0, (int) tree.getMin());
+        assertEquals(0, (int) tree.getMax());
+        
+        assertTrue(tree.add(1));
+        assertEquals(0, (int) tree.getRoot());
+        assertEquals(0, (int) tree.getMin());
+        assertEquals(1, (int) tree.getMax());
+
+        assertTrue(tree.remove(0));
+        assertEquals(1, (int) tree.getRoot());
+        assertEquals(1, (int) tree.getMin());
+        assertEquals(1, (int) tree.getMax());
+    }
+    
+    @Test
+    public void rbBagTest() {
+        final int NUM = 10_000;
+        LinkedRBTreeBag<SimpleLinkedRBBagKey<Integer>> tree =
+                new LinkedRBTreeBag<>(SimpleLinkedRBBagKey.compare(Integer::compareTo));
+        Bag<Integer> bag = new BagFunction<>(tree, SimpleLinkedRBBagKey::new, SimpleLinkedRBBagKey::getData);
+        
+        for (int i = 1; i < NUM; i++) {
+            bag.add(i, i);
+            SimpleLinkedRBBagKey<Integer> key = tree.getMin();
+            while (key != null) {
+                assertEquals((int) key.getData(), key.getCount());
+                long keyBagCount = key.getCount();
+                if (key.hasLeft()) keyBagCount += key.left().getBagSize();
+                if (key.hasRight()) keyBagCount += key.right().getBagSize();
+                assertEquals(keyBagCount, key.getBagSize());
+                key = key.next();
+            }
+        }
+        
+        while (!bag.isEmpty()) {
+            tree.remove(tree.get(ThreadLocalRandom.current().nextInt(bag.size())));
+            SimpleLinkedRBBagKey<Integer> key = tree.getMin();
+            while (key != null) {
+                assertEquals((int) key.getData(), key.getCount());
+                long keyBagCount = key.getCount();
+                if (key.hasLeft()) keyBagCount += key.left().getBagSize();
+                if (key.hasRight()) keyBagCount += key.right().getBagSize();
+                assertEquals(keyBagCount, key.getBagSize());
+                key = key.next();
+            }
+        }
     }
     
     // TODO:

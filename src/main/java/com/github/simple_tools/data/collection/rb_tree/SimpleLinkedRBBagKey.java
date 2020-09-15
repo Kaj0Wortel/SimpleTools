@@ -18,6 +18,7 @@ package com.github.simple_tools.data.collection.rb_tree;
 
 import lombok.Getter;
 
+import java.util.Comparator;
 import java.util.Objects;
 
 /**
@@ -64,5 +65,16 @@ public class SimpleLinkedRBBagKey<D>
         return Objects.toString(data);
     }
 
+    /**
+     * Creates a comparator for this class using a comparator for the data type.
+     * 
+     * @param cmp The comparator to compare the data.
+     * @param <D> The data type to compare.
+     * 
+     * @return A comparator which compares the data of two {@link SimpleLinkedRBBagKey}s.
+     */
+    public static <D> Comparator<SimpleLinkedRBBagKey<D>> compare(Comparator<D> cmp) {
+        return (d1, d2) -> cmp.compare(d1.getData(), d2.getData());
+    }
 
 }

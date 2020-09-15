@@ -103,7 +103,7 @@ public class HashBag<E>
     }
 
     @Override
-    public int bagSize() {
+    public long bagSize() {
         return bagSize;
     }
 

@@ -174,7 +174,7 @@ public interface Bag<E>
     /**
      * @return The sum of the counts of the elements in the bag.
      */
-    int bagSize();
+    long bagSize();
     
     @Override
     default boolean isEmpty() {

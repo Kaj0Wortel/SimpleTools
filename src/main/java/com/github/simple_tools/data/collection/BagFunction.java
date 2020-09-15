@@ -106,7 +106,7 @@ public class BagFunction<S, T>
     }
 
     @Override
-    public int bagSize() {
+    public long bagSize() {
         return getSrc().bagSize();
     }
     

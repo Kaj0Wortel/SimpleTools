@@ -36,7 +36,7 @@ public class RBTreeBag<D>
      * ------------------------------------------------------------------------
      */
     /** The bagSize of the bag. */
-    protected int bagSize = 0;
+    protected long bagSize = 0;
     
 
     /* ------------------------------------------------------------------------
@@ -112,8 +112,9 @@ public class RBTreeBag<D>
             throws IllegalArgumentException {
         if (data == null) throw new NullPointerException("data = null");
         if (amt <= 0) throw new IllegalArgumentException("amt <= 0");
-        RBNode<D> node = bstInsert(data, amt);
+        RBBagNode<D> node = (RBBagNode<D>) bstInsert(data, amt);
         if (node == null) return true;
+        updateBagSizeParents(node, amt);
         balanceTreeInsert(node);
         size++;
         bagSize += amt;
@@ -144,7 +145,9 @@ public class RBTreeBag<D>
     @Override
     protected RBNode<D> insertExisting(@NonNull RBNode<D> existing, @NonNull D data, Object args) {
         int amt = (args instanceof Integer ? (int) args : 1);
-        ((RBBagNode<D>) existing).addCount(amt);
+        RBBagNode<D> bagNode = (RBBagNode<D>) existing;
+        bagNode.addCount(amt);
+        updateBagSizeParents(bagNode, amt);
         bagSize += amt;
         return null;
     }
@@ -185,14 +188,56 @@ public class RBTreeBag<D>
         if (node.getCount() > amt) {
             bagSize -= amt;
             node.addCount(-amt);
-            return true;
+            updateBagSizeParents(node, -amt);
         } else {
-            if (super.removeNode(node, null)) {
-                bagSize -= node.getCount();
-                node.setCount(0);
-                return true;
+            bagSize -= node.getCount();
+            updateBagSizeParents(node, -node.getCount());
+            node.addCount(-node.getCount());
+            if (!super.removeNode(node, null)) {
+                throw new IllegalStateException();
             }
-            return false;
+        }
+        return true;
+    }
+    
+    @Override
+    protected void swap(RBNode<D> n1, RBNode<D> n2) {
+        RBBagNode<D> n1Bag = (RBBagNode<D>) n1;
+        RBBagNode<D> n2Bag = (RBBagNode<D>) n2;
+        int diff = n2Bag.getCount() - n1Bag.getCount();
+        if (diff != 0) {
+            updateBagSizeParents(n1Bag, diff);
+            updateBagSizeParents(n2Bag, -diff);
+        }
+        super.swap(n1, n2);
+        long bagSize1 = n2Bag.getBagSize() - n2Bag.getCount() + n1Bag.getCount();
+        long bagSize2 = n1Bag.getBagSize() - n1Bag.getCount() + n2Bag.getCount();
+        n1Bag.setBagSize(bagSize1);
+        n2Bag.setBagSize(bagSize2);
+    }
+    
+    @Override
+    protected void updateSize(RBNode<D> p) {
+        if (p != null) {
+            super.updateSize(p);
+            RBBagNode<D> n = (RBBagNode<D>) p;
+            long bagSize = n.getCount();
+            if (n.hasLeft()) bagSize += ((RBBagNode<D>) n.getLeft()).getBagSize();
+            if (n.hasRight()) bagSize += ((RBBagNode<D>) n.getRight()).getBagSize();
+            n.setBagSize(bagSize);
+        }
+    }
+
+    /**
+     * Updates the size of the subtree of the parents of the given node.
+     *
+     * @param node The starting node.
+     */
+    protected void updateBagSizeParents(RBBagNode<D> node, int diff) {
+        if (node == null) return;
+        while (node.hasParent()) {
+            node = (RBBagNode<D>) node.getParent();
+            node.setBagSize(node.getBagSize() + diff);
         }
     }
     
@@ -222,14 +267,14 @@ public class RBTreeBag<D>
     }
 
     @Override
-    public int bagSize() {
+    public long bagSize() {
         return bagSize;
     }
     
     @Override
     public void clear() {
         super.clear();
-        bagSize = 0;
+        bagSize = 0L;
     }
     
     @Override

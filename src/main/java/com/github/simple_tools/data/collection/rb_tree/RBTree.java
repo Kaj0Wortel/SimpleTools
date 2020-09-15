@@ -620,7 +620,8 @@ public class RBTree<D>
     /**
      * Does a binary search tree delete, but doesn't delete the node. <br>
      * The node returned by the function must have at most one child. <br>
-     * The values {@code min}, {@code max} and {@code root} should also be updated here.
+     * The values {@code min}, {@code max} and {@code root} should also be
+     * updated here when swaps occur.
      *
      * @param node The node to be deleted delete.
      * 
@@ -633,21 +634,9 @@ public class RBTree<D>
             // Note that this implies that {@code node} cannot be min or max.
             RBNode<D> next = next(node);
             swap(node, next);
-            if (node == max) max = next;
-            if (node == min) min = next;
-            if (node == root) root = next;
-            
-        } else if (node.hasChild()) {
-            // The node is near-leaf.
-            if (node == min) min = node.getRight();
-            else if (node == max) max = node.getLeft();
-            
-        } else {
-            // The node is a leaf.
-            if (node == root) min = max = root = null;
-            if (node == min) min = node.getParent();
-            else if (node == max) max = node.getParent();
         }
+        
+        // The node is a (near-)leaf.
         updateSizeParents(node, -1);
         return node;
     }
@@ -658,7 +647,7 @@ public class RBTree<D>
      *
      * @param x The node to balance the tree at.
      */
-    protected final void balanceTreeDelete(RBNode<D> x) {
+    protected void balanceTreeDelete(RBNode<D> x) {
         if (root == null) return;
         
         // x has at most one child.
@@ -668,12 +657,20 @@ public class RBTree<D>
             // x or child is red or x.
             if (x.isLeft()) setLeft(x.getParent(), child);
             else setRight(x.getParent(), child);
-            if (root == x) root = child;
+            if (x == root) root = child;
+            if (x == min) min = child;
+            else if (x == max) max = child;
             child.setColor(RBColor.BLACK);
             return;
         }
         
         // x has no children.
+        
+        if (x == root) {
+            min = max = root = null;
+            return;
+        } else if (x == min) min = x.getParent();
+        else if (x == max) max = x.getParent();
         
         RBNode<D> p = x.getParent();
         RBNode<D> s = x.getSibling();
@@ -867,7 +864,7 @@ public class RBTree<D>
      *
      * @param p The parent, which is the root of the rotation.
      */
-    private void rotateLeft(RBNode<D> p) {
+    protected void rotateLeft(RBNode<D> p) {
         RBNode<D> x = p.getRight();
         if (p.isLeft()) setLeft(p.getParent(), x);
         else setRight(p.getParent(), x);
@@ -883,7 +880,7 @@ public class RBTree<D>
      *
      * @param p The parent, which is the root of the rotation.
      */
-    private void rotateRight(RBNode<D> p) {
+    protected void rotateRight(RBNode<D> p) {
         RBNode<D> x = p.getLeft();
         if (p.isLeft()) setLeft(p.getParent(), x);
         else setRight(p.getParent(), x);
@@ -899,7 +896,7 @@ public class RBTree<D>
      * 
      * @param p The node to update the size for.
      */
-    protected final void updateSize(RBNode<D> p) {
+    protected void updateSize(RBNode<D> p) {
         if (p != null) {
             p.setSize(sizeOfChild(p, true) + sizeOfChild(p, false) + 1);
         }

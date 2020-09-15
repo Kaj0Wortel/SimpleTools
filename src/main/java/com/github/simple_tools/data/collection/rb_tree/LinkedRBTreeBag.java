@@ -182,6 +182,13 @@ public class LinkedRBTreeBag<D extends LinkedRBBagKey<D>>
     public D search(RBSearch<D> search) {
         return super.search(search);
     }
-    
+
+    @Override
+    public void clear() {
+        for (LinkedRBBagKey<D> key : this) {
+            key.setNode(null);
+        }
+        super.clear();
+    }
 
 }

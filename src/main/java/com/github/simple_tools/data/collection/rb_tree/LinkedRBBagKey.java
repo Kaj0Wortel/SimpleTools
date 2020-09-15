@@ -27,7 +27,7 @@ import com.github.simple_tools.data.collection.TreeKey;
  * 
  * @see LinkedRBTreeBag
  */
-public class LinkedRBBagKey<D extends LinkedRBBagKey<D>>
+public abstract class LinkedRBBagKey<D extends LinkedRBBagKey<D>>
         implements TreeKey<D>, LinkedKey<D> {
 
     /* ------------------------------------------------------------------------
@@ -110,6 +110,21 @@ public class LinkedRBBagKey<D extends LinkedRBBagKey<D>>
      */
     public int getSize() {
         return (node == null ? 0 : node.getSize());
+    }
+
+    /**
+     * @return The count of this key.
+     */
+    public int getCount() {
+        return (node == null ? 0 : node.getCount());
+    }
+
+    /**
+     * @return The amount of nodes in the subtree starting at this node,
+     *     including this node.
+     */
+    public long getBagSize() {
+        return (node == null ? 0 : node.getBagSize());
     }
     
     

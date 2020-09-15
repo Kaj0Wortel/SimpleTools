@@ -40,8 +40,7 @@ public class BagTest
                 new HashBag<>(),
                 new RBTreeBag<>(Integer::compareTo),
                 new BagFunction<SimpleLinkedRBBagKey<Integer>, Integer>(
-                        new LinkedRBTreeBag<SimpleLinkedRBBagKey<Integer>>(
-                                Comparator.comparingInt(SimpleLinkedRBBagKey::getData)),
+                        new LinkedRBTreeBag<>(SimpleLinkedRBBagKey.compare(Integer::compareTo)),
                         SimpleLinkedRBBagKey::new,
                         SimpleLinkedRBBagKey::getData
                 )

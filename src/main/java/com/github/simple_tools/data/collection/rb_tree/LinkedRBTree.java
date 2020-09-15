@@ -210,5 +210,12 @@ public class LinkedRBTree<D extends LinkedRBKey<D>>
         return super.search(search);
     }
     
+    @Override
+    public void clear() {
+        for (LinkedRBKey<D> key : this) {
+            key.setNode(null);
+        }
+        super.clear();
+    }
     
 }

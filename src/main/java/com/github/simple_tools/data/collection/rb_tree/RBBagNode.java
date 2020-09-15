@@ -41,7 +41,9 @@ public class RBBagNode<D>
      * ------------------------------------------------------------------------
      */
     /** The count of the element. */
-    private int count = 1;
+    protected int count = 1;
+    /** The size of the bag sub-tree starting at this node. */
+    protected long bagSize = 1L;
 
     
     /* ------------------------------------------------------------------------
@@ -66,7 +68,7 @@ public class RBBagNode<D>
      */
     public RBBagNode(D data, int count) {
         super(data);
-        this.count = count;
+        this.bagSize = this.count = count;
     }
 
     
@@ -76,22 +78,26 @@ public class RBBagNode<D>
      */
     /**
      * Adds the given amount to the count.
+     * Also updates the bag size of this node accordingly.
      * 
      * @param amt The amount to add to the count.
      */
     protected void addCount(int amt) {
         count += amt;
+        bagSize += amt;
     }
     
     @Override
     public String toString() {
-        return "Node[" + System.lineSeparator() +
-                "  this  : " + getData() + System.lineSeparator() +
-                "  count : " + getCount() + System.lineSeparator() +
-                "  color : " + getColor() + System.lineSeparator() +
-                "  parent: " + (!hasParent() ? "null" : getParent().getData()) + System.lineSeparator() +
-                "  left  : " + (!hasLeft() ? "null" : getLeft().getData()) + System.lineSeparator() +
-                "  right : " + (!hasRight() ? "null" : getRight().getData()) + System.lineSeparator() +
+        return getClass().getSimpleName() + "[" + System.lineSeparator() +
+                "  this   : " + getData() + System.lineSeparator() +
+                "  size   : " + getSize() + System.lineSeparator() +
+                "  count  : " + getCount() + System.lineSeparator() +
+                "  bagSize: " + getBagSize() + System.lineSeparator() +
+                "  color  : " + getColor() + System.lineSeparator() +
+                "  parent : " + (!hasParent() ? "null" : getParent().getData()) + System.lineSeparator() +
+                "  left   : " + (!hasLeft() ? "null" : getLeft().getData()) + System.lineSeparator() +
+                "  right  : " + (!hasRight() ? "null" : getRight().getData()) + System.lineSeparator() +
                 "]";
     }
     
