@@ -34,7 +34,7 @@ import lombok.Setter;
  * @see RBTree
  */
 @Getter
-@Setter(AccessLevel.PROTECTED)
+@Setter
 public class RBNode<D>
         implements TreeNode<RBNode<D>, D> {
      
@@ -54,7 +54,7 @@ public class RBNode<D>
     /** The size of the subtree. */
     protected int size = 1;
     /** The data element of this node. */
-    final private D data;
+    private D data;
     
     
     /* ------------------------------------------------------------------------

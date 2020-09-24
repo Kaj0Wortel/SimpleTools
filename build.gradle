@@ -72,10 +72,8 @@ jar {
 }
 
 task zipSrc(type: Zip) {
-    baseName 'simpletools'
-    dependsOn clean
-    from 'src'
-    archiveName "${baseName}-${version}.zip"
+    classifier = 'src'
+    from sourceSets*.allSource
 }
 
 task export(type: Copy) {

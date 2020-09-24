@@ -16,8 +16,12 @@
 
 package com.github.simple_tools.data.collection.rb_tree;
 
+import com.github.simple_tools.data.containers.Pair;
+
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 /**
  * Class implementing a linked red-black tree search tree. It supports the following operations:
@@ -217,5 +221,46 @@ public class LinkedRBTree<D extends LinkedRBKey<D>>
         }
         super.clear();
     }
+
+    /**
+     * Swaps the given two keys.
+     * 
+     * @param k1           The first key to swap.
+     * @param k2           The second key to swap.
+     * @param swapFunction The function used to swap the data of the two keys.
+     * 
+     * @throws IllegalStateException If the data of the two keys was not correctly swapped.
+     *     If this exception is thrown, then the state of the tree is unspecified.
+     */
+    public void swap(D k1, D k2, BiConsumer<D, D> swapFunction)
+                throws IllegalStateException {
+        LinkedRBNode<D> n1 = k1.getNode();
+        LinkedRBNode<D> n2 = k2.getNode();
+        k1.setNode(null);
+        k2.setNode(null);
+        n1.setData(null);
+        n2.setData(null);
+        swapFunction.accept(k1, k2);
+        n1.setData(k2);
+        n2.setData(k1);
+        k1.setNode(n2);
+        k2.setNode(n1);
+        if (!isValid(k1) || !isValid(k2)) {
+            throw new IllegalStateException();
+        }
+    }
+
+    /**
+     * Verifies whether a given key has been placed correctly.
+     * 
+     * @param k The key to verify.
+     * 
+     * @return {@code true} if the key has been placed correctly.
+     */
+    private boolean isValid(D k) {
+        return (k.prev() == null || comparator.compare(k.prev(), k) < 0) &&
+                (k.next() == null || comparator.compare(k, k.next()) < 0);
+    }
+    
     
 }

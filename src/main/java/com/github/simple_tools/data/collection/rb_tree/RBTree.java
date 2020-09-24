@@ -1230,19 +1230,6 @@ public class RBTree<D>
         if (isEmpty()) throw new NoSuchElementException();
         return getMin();
     }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder("[");
-        boolean first = true;
-        for (D data : this) {
-            if (first) first = false;
-            else sb.append(", ");
-            sb.append(data.toString());
-        }
-        sb.append("]");
-        return sb.toString();
-    }
     
     
     /* ------------------------------------------------------------------------
@@ -1261,6 +1248,19 @@ public class RBTree<D>
             sb.append(System.lineSeparator());
             n = next(n);
         }
+        return sb.toString();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("[");
+        boolean first = true;
+        for (D data : this) {
+            if (first) first = false;
+            else sb.append(", ");
+            sb.append(data.toString());
+        }
+        sb.append("]");
         return sb.toString();
     }
     

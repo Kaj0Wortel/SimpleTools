@@ -870,11 +870,51 @@ public class RBTreeTest
     }
     
     public <V> void indexOfTest(RBTree<V> tree, Function<Integer, V> f) {
-        for (int i = 0; i < 500; i++) {
+        final int AMT = 500;
+        for (int i = 0; i < AMT; i++) {
             tree.add(f.apply(i));
             for (int j = 0; j <= i; j++) {
                 assertEquals("i=" + i + ", j=" + j, j, tree.indexOf(f.apply(j)));
             }
+        }
+    }
+    
+    @Test
+    public void swapLinkedTest() {
+        final int AMT = 500;
+        LinkedRBTree<SimpleLinkedRBKey<Integer>> tree = new LinkedRBTree<>(
+                SimpleLinkedRBKey.compare(Integer::compare));
+        for (int i = 0; i < AMT; i++) {
+            tree.add(new SimpleLinkedRBKey<>(i));
+        }
+        for (int i = 0; i < AMT; i++) {
+            for (int j = AMT - 1; j >= 0; j--) {
+                tree.swap(tree.get(i), tree.get(j), SimpleLinkedRBKey::swap);
+            }
+        }
+        for (int i = 0; i < tree.size(); i++) {
+            assertEquals(i, (int) tree.get(i).getData());
+        }
+    }
+
+    @Test
+    public void swapLinkedBagTest() {
+        final int AMT = 3;
+        LinkedRBTreeBag<SimpleLinkedRBBagKey<Integer>> tree = new LinkedRBTreeBag<>(
+                SimpleLinkedRBBagKey.compare(Integer::compare));
+        for (int i = 0; i < AMT; i++) {
+            tree.add(new SimpleLinkedRBBagKey<>(i), i + 1);
+        }
+        System.out.println(tree.debug());
+        for (int i = 0; i < AMT; i++) {
+            for (int j = AMT - 1; j >= 0; j--) {
+                tree.swap(tree.get(i), tree.get(j), SimpleLinkedRBBagKey::swap);
+            }
+        }
+        System.out.println(tree.debug());
+        for (int i = 0; i < tree.size(); i++) {
+            assertEquals("i=" + i, i, (int) tree.get(i).getData());
+            assertEquals("i=" + i, i + 1, tree.count(new SimpleLinkedRBBagKey<>(i)));
         }
     }
     
