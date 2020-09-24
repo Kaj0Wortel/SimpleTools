@@ -283,5 +283,39 @@ public class RBTreeBag<D>
         super.initTree(nodes);
     }
 
+    /**
+     * Searches for the bag index of the given key.
+     * This function is similar to {@link #indexOf(Object)}, however
+     * this uses the item count in stead of the existence of the items
+     * as counting measure.
+     *
+     * @param key The key to find the bag index of.
+     *
+     * @return The bag index of the value at the given key.
+     */
+    @SuppressWarnings("unchecked")
+    public int bagIndexOf(Object key) {
+        RBBagNode<D> node = (RBBagNode<D>) root;
+        int bagIndex = 0;
+        while (node != null) {
+            int cmp = comparator.compare((D) key, node.getData());
+            if (cmp < 0) {
+                node = (RBBagNode<D>) node.getLeft();
+            } else if (cmp > 0) {
+                if (node.hasLeft()) {
+                    bagIndex += ((RBBagNode<D>) node.getLeft()).getCount();
+                }
+                bagIndex++;
+                node = (RBBagNode<D>) node.getRight();
+            } else {
+                if (node.hasLeft()) {
+                    bagIndex += ((RBBagNode<D>) node.getLeft()).getCount();
+                }
+                return bagIndex;
+            }
+        }
+        return -1;
+    }
+
 
 }

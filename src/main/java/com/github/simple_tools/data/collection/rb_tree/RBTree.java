@@ -596,6 +596,18 @@ public class RBTree<D>
         return removeNode(get((D) obj), null);
     }
     
+    @Override
+    public boolean removeAll(Collection<?> col) {
+        Objects.requireNonNull(col);
+        boolean mod = false;
+        for (Object v : col) {
+            if (remove(v)) {
+                mod = true;
+            }
+        }
+        return mod;
+    }
+    
     /**
      * Removes the given node. This function assumes that the node
      * occurs in the tree.
@@ -1134,6 +1146,37 @@ public class RBTree<D>
             }
         }
         throw new IllegalStateException();
+    }
+
+    /**
+     * Searches for the index of the given key.
+     * 
+     * @param key The key to find the index of.
+     * 
+     * @return The index of the value at the given key.
+     */
+    @SuppressWarnings("unchecked")
+    public int indexOf(Object key) {
+        RBNode<D> node = root;
+        int index = 0;
+        while (node != null) {
+            int cmp = comparator.compare((D) key, node.getData());
+            if (cmp < 0) {
+                node = node.getLeft();
+            } else if (cmp > 0) {
+                if (node.hasLeft()) {
+                    index += node.getLeft().getSize();
+                }
+                index++;
+                node = node.getRight();
+            } else {
+                if (node.hasLeft()) {
+                    index += node.getLeft().getSize();
+                }
+                return index;
+            }
+        }
+        return -1;
     }
     
     /**

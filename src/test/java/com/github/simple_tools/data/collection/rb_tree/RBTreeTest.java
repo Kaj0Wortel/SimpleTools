@@ -19,6 +19,7 @@ package com.github.simple_tools.data.collection.rb_tree;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
 
 import com.github.simple_tools.AbstractTest;
 import com.github.simple_tools.data.array.ArrayTools;
@@ -854,6 +855,25 @@ public class RBTreeTest
                 if (key.hasRight()) keyBagCount += key.right().getBagSize();
                 assertEquals(keyBagCount, key.getBagSize());
                 key = key.next();
+            }
+        }
+    }
+    
+    @Test
+    public void indexOfTest() {
+        indexOfTest(new RBTree<>(Integer::compareTo), Function.identity());
+        indexOfTest(new RBTreeBag<>(Integer::compareTo), Function.identity());
+        indexOfTest(new LinkedRBTree<>(SimpleLinkedRBKey.compare(Integer::compareTo)),
+                SimpleLinkedRBKey::new);
+        indexOfTest(new LinkedRBTreeBag<>(SimpleLinkedRBBagKey.compare(Integer::compareTo)),
+                SimpleLinkedRBBagKey::new);
+    }
+    
+    public <V> void indexOfTest(RBTree<V> tree, Function<Integer, V> f) {
+        for (int i = 0; i < 500; i++) {
+            tree.add(f.apply(i));
+            for (int j = 0; j <= i; j++) {
+                assertEquals("i=" + i + ", j=" + j, j, tree.indexOf(f.apply(j)));
             }
         }
     }
