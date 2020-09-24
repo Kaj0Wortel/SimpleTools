@@ -18,6 +18,8 @@ package com.github.simple_tools.data.collection.rb_tree;
 import com.github.simple_tools.data.collection.LinkedKey;
 import com.github.simple_tools.data.collection.TreeKey;
 
+import java.util.function.BiConsumer;
+
 /**
  * The key used for the {@link LinkedRBTreeBag} class.
  * 
@@ -125,6 +127,19 @@ public abstract class LinkedRBBagKey<D extends LinkedRBBagKey<D>>
      */
     public long getBagSize() {
         return (node == null ? 0 : node.getBagSize());
+    }
+
+    /**
+     * Swaps the data of the two keys.
+     * This function should be overridden when you want to use the
+     * {@link LinkedRBTreeBag#swap(LinkedRBBagKey, LinkedRBBagKey)} function.
+     * Note that the data of the keys is not allowed to be modified
+     * in any other way when it is inserted in the tree.
+     * 
+     * @param other The key to swap the data with.
+     */
+    protected void swap(D other) {
+        throw new UnsupportedOperationException();
     }
     
     

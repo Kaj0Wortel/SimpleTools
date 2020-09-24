@@ -17,6 +17,7 @@
 package com.github.simple_tools.data.collection.rb_tree;
 
 import com.github.simple_tools.data.containers.Pair;
+import lombok.NonNull;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -224,15 +225,19 @@ public class LinkedRBTree<D extends LinkedRBKey<D>>
 
     /**
      * Swaps the given two keys.
+     * Both keys must be already inserted in this tree and override the
+     * {@link LinkedRBKey#swap(LinkedRBKey)} function.
      * 
-     * @param k1           The first key to swap.
-     * @param k2           The second key to swap.
-     * @param swapFunction The function used to swap the data of the two keys.
+     * @apiNote
+     * This action is performed in {@code O(1)}.
+     * 
+     * @param k1 The first key to swap.
+     * @param k2 The second key to swap.
      * 
      * @throws IllegalStateException If the data of the two keys was not correctly swapped.
      *     If this exception is thrown, then the state of the tree is unspecified.
      */
-    public void swap(D k1, D k2, BiConsumer<D, D> swapFunction)
+    public void swap(@NonNull D k1, @NonNull D k2)
                 throws IllegalStateException {
         LinkedRBNode<D> n1 = k1.getNode();
         LinkedRBNode<D> n2 = k2.getNode();
@@ -240,7 +245,7 @@ public class LinkedRBTree<D extends LinkedRBKey<D>>
         k2.setNode(null);
         n1.setData(null);
         n2.setData(null);
-        swapFunction.accept(k1, k2);
+        k1.swap(k2);
         n1.setData(k2);
         n2.setData(k1);
         k1.setNode(n2);

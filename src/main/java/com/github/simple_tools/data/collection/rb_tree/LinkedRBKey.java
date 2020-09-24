@@ -19,6 +19,8 @@ package com.github.simple_tools.data.collection.rb_tree;
 import com.github.simple_tools.data.collection.LinkedKey;
 import com.github.simple_tools.data.collection.TreeKey;
 
+import javax.naming.OperationNotSupportedException;
+
 /**
  * This key class is used for the {@link LinkedRBTree} data structure.
  * The user of this data structure should extends this class. <br>
@@ -114,6 +116,19 @@ public abstract class LinkedRBKey<D extends LinkedRBKey<D>>
      */
     public int getSize() {
         return (node == null ? 0 : node.getSize());
+    }
+
+    /**
+     * Swaps the data of the two keys.
+     * This function should be overridden when you want to use the
+     * {@link LinkedRBTree#swap(LinkedRBKey, LinkedRBKey)} function.
+     * Note that the data of the keys is not allowed to be modified
+     * in any other way when it is inserted in the tree.
+     *
+     * @param other The key to swap the data with.
+     */
+    protected void swap(D other) {
+        throw new UnsupportedOperationException();
     }
     
     

@@ -889,7 +889,7 @@ public class RBTreeTest
         }
         for (int i = 0; i < AMT; i++) {
             for (int j = AMT - 1; j >= 0; j--) {
-                tree.swap(tree.get(i), tree.get(j), SimpleLinkedRBKey::swap);
+                tree.swap(tree.get(i), tree.get(j));
             }
         }
         for (int i = 0; i < tree.size(); i++) {
@@ -908,7 +908,7 @@ public class RBTreeTest
         System.out.println(tree.debug());
         for (int i = 0; i < AMT; i++) {
             for (int j = AMT - 1; j >= 0; j--) {
-                tree.swap(tree.get(i), tree.get(j), SimpleLinkedRBBagKey::swap);
+                tree.swap(tree.get(i), tree.get(j));
             }
         }
         System.out.println(tree.debug());

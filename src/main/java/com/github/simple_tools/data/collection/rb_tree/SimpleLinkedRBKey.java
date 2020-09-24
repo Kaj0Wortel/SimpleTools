@@ -71,23 +71,12 @@ public class SimpleLinkedRBKey<D>
     public static <D> Comparator<SimpleLinkedRBKey<D>> compare(Comparator<D> cmp) {
         return (d1, d2) -> cmp.compare(d1.getData(), d2.getData());
     }
-
-    /**
-     * Swaps the data of the two keys. <br>
-     * <br>
-     * <b>WARNING!</b><br>
-     * <br>
-     * ONLY use this function for the {@link LinkedRBTree#swap(LinkedRBKey, LinkedRBKey, BiConsumer)}
-     * function!
-     * 
-     * @param k1  The first key to swap.
-     * @param k2  The second key to swap.
-     * @param <D> The type of the keys.
-     */
-    public static <D> void swap(SimpleLinkedRBKey<D> k1, SimpleLinkedRBKey<D> k2) {
-        D data = k1.data;
-        k1.data = k2.data;
-        k2.data = data;
+    
+    @Override
+    protected void swap(SimpleLinkedRBKey<D> other) {
+        D data = this.data;
+        this.data = other.data;
+        other.data = data;
     }
 
 

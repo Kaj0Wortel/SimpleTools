@@ -20,7 +20,6 @@ import lombok.Getter;
 
 import java.util.Comparator;
 import java.util.Objects;
-import java.util.function.BiConsumer;
 
 /**
  * A class for a simple wrapper of the {@link LinkedRBKey}.
@@ -78,22 +77,11 @@ public class SimpleLinkedRBBagKey<D>
         return (d1, d2) -> cmp.compare(d1.getData(), d2.getData());
     }
 
-    /**
-     * Swaps the data of the two keys. <br>
-     * <br>
-     * <b>WARNING!</b><br>
-     * <br>
-     * ONLY use this function for the {@link LinkedRBTreeBag#swap(LinkedRBKey, LinkedRBKey, BiConsumer)}
-     * function!
-     *
-     * @param k1  The first key to swap.
-     * @param k2  The second key to swap.
-     * @param <D> The type of the keys.
-     */
-    public static <D> void swap(SimpleLinkedRBBagKey<D> k1, SimpleLinkedRBBagKey<D> k2) {
-        D data = k1.data;
-        k1.data = k2.data;
-        k2.data = data;
+    @Override
+    protected void swap(SimpleLinkedRBBagKey<D> other) {
+        D data = this.data;
+        this.data = other.data;
+        other.data = data;
     }
     
 
