@@ -156,7 +156,7 @@ public class RBTreeBag<D>
     @SuppressWarnings("unchecked")
     public boolean remove(Object obj, int amt) {
         if (amt <= 0) throw new IllegalArgumentException("amt <= 0");
-        return removeNode((RBBagNode<D>) get((D) obj), amt);
+        return removeNode((RBBagNode<D>) getNode((D) obj), amt);
     }
     
     /**
@@ -261,7 +261,7 @@ public class RBTreeBag<D>
     @Override
     @SuppressWarnings("unchecked")
     public int count(Object data) {
-        RBBagNode<D> node = (RBBagNode<D>) get((D) data);
+        RBBagNode<D> node = (RBBagNode<D>) getNode((D) data);
         if (node == null) return 0;
         return node.getCount();
     }

@@ -17,6 +17,9 @@
 package com.github.simple_tools.data.collection.rb_tree;
 
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import com.github.simple_tools.data.collection.rb_tree.RBSearch.Choice;
 import lombok.NonNull;
@@ -244,7 +247,7 @@ public class RBTree<D>
     @Override
     @SuppressWarnings("unchecked")
     public boolean contains(Object obj) {
-        return get((D) obj) != null;
+        return getNode((D) obj) != null;
     }
 
     /**
@@ -339,7 +342,7 @@ public class RBTree<D>
      *
      * @return The node with the given value, or {@code null} if no such node exists.
      */
-    protected RBNode<D> get(D key) {
+    protected RBNode<D> getNode(D key) {
         if (key == null || root == null) return null;
         final RBNode<D> node = getNearest(key);
         if (comparator.compare(node.getData(), key) == 0) return node;
@@ -472,6 +475,27 @@ public class RBTree<D>
         size++;
         return true;
     }
+
+    /**
+     * Merges the given key using the merge function if it already exists.
+     * Simply inserts it otherwise.
+     * 
+     * @param key           The key to insert.
+     * @param mergeFunction The merge function.
+     * 
+     * @return The previously inserted key, or {@code null} otherwise.
+     */
+    public D merge(D key, BiFunction<D, D, D> mergeFunction) {
+        RBNode<D> node = getNode(key);
+        if (node == null) {
+            add(key);
+            return null;
+        } else {
+            D prev = node.getData();
+            node.setData(mergeFunction.apply(node.getData(), key));
+            return prev;
+        }
+    }
     
     /**
      * Updates the size of the subtree of the parents of the given node.
@@ -593,7 +617,7 @@ public class RBTree<D>
     @Override
     @SuppressWarnings("unchecked")
     public boolean remove(Object obj) {
-        return removeNode(get((D) obj), null);
+        return removeNode(getNode((D) obj), null);
     }
     
     @Override
@@ -960,7 +984,7 @@ public class RBTree<D>
      */
     public D next(D data) {
         if (comparator.compare(data, max.getData()) == 0) return null;
-        return gd(next(get(data)));
+        return gd(next(getNode(data)));
     }
     
     /**
@@ -993,7 +1017,7 @@ public class RBTree<D>
      */
     public D prev(D data) {
         if (comparator.compare(data, min.getData()) == 0) return null;
-        return gd(prev(get(data)));
+        return gd(prev(getNode(data)));
     }
     
     /**
@@ -1122,7 +1146,7 @@ public class RBTree<D>
      * 
      * @return The element at the given index.
      */
-    public D get(int i) {
+    public D getNode(int i) {
         if (i < 0 || i >= size()) throw new IndexOutOfBoundsException(i);
         int sum = 0;
         RBNode<D> node = root;

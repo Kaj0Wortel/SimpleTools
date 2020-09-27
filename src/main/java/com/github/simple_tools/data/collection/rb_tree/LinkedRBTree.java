@@ -22,6 +22,7 @@ import lombok.NonNull;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -265,6 +266,22 @@ public class LinkedRBTree<D extends LinkedRBKey<D>>
     private boolean isValid(D k) {
         return (k.prev() == null || comparator.compare(k.prev(), k) < 0) &&
                 (k.next() == null || comparator.compare(k, k.next()) < 0);
+    }
+
+    @Override
+    public D merge(D key, BiFunction<D, D, D> mergeFunction) {
+        LinkedRBNode<D> node = (LinkedRBNode<D>) getNode(key);
+        if (node == null) {
+            add(key);
+            return null;
+        } else {
+            D prev = node.getData();
+            D cur = mergeFunction.apply(node.getData(), key);
+            prev.setNode(null);
+            node.setData(cur);
+            cur.setNode(node);
+            return prev;
+        }
     }
     
     

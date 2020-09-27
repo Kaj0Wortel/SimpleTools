@@ -134,19 +134,19 @@ public class RBTreeTest
     public void get0() {
         RBTree<Integer> tree = new RBTree<>(Integer::compare);
         tree.add(10);
-        assertEquals("Error while getting single element!", 10, (int) tree.get(0));
+        assertEquals("Error while getting single element!", 10, (int) tree.getNode(0));
     }
     
     @Test
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
     public void get1() {
         RBTree<Integer> tree = new RBTree<>(Integer::compare);
-        expEx(IndexOutOfBoundsException.class, () -> tree.get(-1));
-        expEx(IndexOutOfBoundsException.class, () -> tree.get(0));
-        expEx(IndexOutOfBoundsException.class, () -> tree.get(1));
+        expEx(IndexOutOfBoundsException.class, () -> tree.getNode(-1));
+        expEx(IndexOutOfBoundsException.class, () -> tree.getNode(0));
+        expEx(IndexOutOfBoundsException.class, () -> tree.getNode(1));
         tree.add(10);
-        expEx(IndexOutOfBoundsException.class, () -> tree.get(-1));
-        expEx(IndexOutOfBoundsException.class, () -> tree.get(1));
+        expEx(IndexOutOfBoundsException.class, () -> tree.getNode(-1));
+        expEx(IndexOutOfBoundsException.class, () -> tree.getNode(1));
     }
     
     @Test
@@ -157,11 +157,11 @@ public class RBTreeTest
             tree.add(i);
         }
         for (int i = 0; i < amt; i++) {
-            int rtn = tree.get(i);
+            int rtn = tree.getNode(i);
             assertEquals("Wrong returned value!", i, rtn);
         }
-        expEx(IndexOutOfBoundsException.class, () -> tree.get(-1));
-        expEx(IndexOutOfBoundsException.class, () -> tree.get(tree.size()));
+        expEx(IndexOutOfBoundsException.class, () -> tree.getNode(-1));
+        expEx(IndexOutOfBoundsException.class, () -> tree.getNode(tree.size()));
     }
     
     @Test
@@ -169,7 +169,7 @@ public class RBTreeTest
         int amt = 1_000_000;
         RBTree<Integer> tree = new RBTree<>(Integer::compare, ArrayTools.asList(genIntArr(amt)));
         for (int i = 0; i < amt; i++) {
-            int rtn = tree.get(i);
+            int rtn = tree.getNode(i);
             assertEquals("Wrong returned value!", i, rtn);
         }
     }
@@ -846,7 +846,7 @@ public class RBTreeTest
         }
         
         while (!bag.isEmpty()) {
-            tree.remove(tree.get(ThreadLocalRandom.current().nextInt(bag.size())));
+            tree.remove(tree.getNode(ThreadLocalRandom.current().nextInt(bag.size())));
             SimpleLinkedRBBagKey<Integer> key = tree.getMin();
             while (key != null) {
                 assertEquals((int) key.getData(), key.getCount());
@@ -889,11 +889,11 @@ public class RBTreeTest
         }
         for (int i = 0; i < AMT; i++) {
             for (int j = AMT - 1; j >= 0; j--) {
-                tree.swap(tree.get(i), tree.get(j));
+                tree.swap(tree.getNode(i), tree.getNode(j));
             }
         }
         for (int i = 0; i < tree.size(); i++) {
-            assertEquals(i, (int) tree.get(i).getData());
+            assertEquals(i, (int) tree.getNode(i).getData());
         }
     }
 
@@ -908,12 +908,12 @@ public class RBTreeTest
         System.out.println(tree.debug());
         for (int i = 0; i < AMT; i++) {
             for (int j = AMT - 1; j >= 0; j--) {
-                tree.swap(tree.get(i), tree.get(j));
+                tree.swap(tree.getNode(i), tree.getNode(j));
             }
         }
         System.out.println(tree.debug());
         for (int i = 0; i < tree.size(); i++) {
-            assertEquals("i=" + i, i, (int) tree.get(i).getData());
+            assertEquals("i=" + i, i, (int) tree.getNode(i).getData());
             assertEquals("i=" + i, i + 1, tree.count(new SimpleLinkedRBBagKey<>(i)));
         }
     }
