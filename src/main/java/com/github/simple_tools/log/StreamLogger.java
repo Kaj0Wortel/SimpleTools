@@ -72,7 +72,7 @@ public class StreamLogger
      * -------------------------------------------------------------------------
      */
     @Override
-    public void writeText(String text)
+    protected void writeText(String text)
             throws IOException {
         if (stream != null) {
             stream.write(text.getBytes(charset));
@@ -83,7 +83,7 @@ public class StreamLogger
     public void open() {
         lock();
         try {
-            closed = (stream != null);
+            closed = (stream == null);
             
         } finally {
             unlock();

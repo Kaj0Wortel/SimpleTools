@@ -167,7 +167,17 @@ public abstract class Logger
     protected static Level checkLevel(Level level) {
         return (level != null ? level : Level.NONE);
     }
-
+    
+    
+    /**
+     * Writes the exception to a log file. <br>
+     * Uses the current time as time stamp.
+     *
+     * @param e The exception to be written.
+     */
+    public void writeE(Exception e) {
+        writeE(e, new Date());
+    }
 
     /**
      * Writes the exception to a log file. <br>
@@ -192,6 +202,16 @@ public abstract class Logger
 
     /**
      * Writes the object to a log file. <br>
+     * Uses the current time as time stamp.
+     * 
+     * @param obj The object to be written.
+     */
+    public void writeO(Object obj) {
+        writeO(obj, new Date());
+    }
+    
+    /**
+     * Writes the object to a log file. <br>
      * Here, it must be ensured that {@code level != null} and {@code timeStamp != null}.
      *
      * @param obj The object to be written.
@@ -210,6 +230,17 @@ public abstract class Logger
      * @param timeStamp The time stamp in milliseconds precision.
      */
     public abstract void writeO(Object obj, Level level, Date timeStamp);
+
+    /**
+     * Writes an object array to a log file.
+     * Ensures that all data is logged consecutively. <br>
+     * Uses the current time as time stamp.
+     *
+     * @param objArr The object array to be written.
+     */
+    public void writeOA(Object[] objArr) {
+        writeOA(objArr, new Date());
+    }
 
     /**
      * Writes an object array to a log file.
