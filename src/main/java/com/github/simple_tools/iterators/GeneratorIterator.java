@@ -52,6 +52,7 @@ public abstract class GeneratorIterator<E>
         if (done) return false;
         if (!generated) {
             nextElem = generateNext();
+            generated = true;
         }
         return !done;
     }
