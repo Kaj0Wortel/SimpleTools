@@ -22,6 +22,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 
 import com.github.simple_tools.MultiTool;
+import com.github.simple_tools.PublicCloneable;
 import com.github.simple_tools.iterators.GeneratorIterator;
 
 /**
@@ -1621,157 +1622,120 @@ public final class ArrayTools {
         return dst;
     }
     
-//    @SuppressWarnings("unchecked")
-//    public static <A> A deepClone(A arr) {
-//        if (arr == null) {
-//            return null;
-//            
-//        } else if (arr.getClass().isArray()) {
-//            if (arr.getClass().getComponentType().isArray()) { // 2+D array.
-//                final int length = ArrayTools.length(arr);
-//                final A copy = (A) Array.newInstance(arr.getClass().getComponentType(), length);
-//                for (int i = 0; i < length; i++) {
-//                    set(copy, i, deepClone((Object) get(arr, i)));
-//                }
-//
-//            } else { // 1D array.
-//                if (arr.getClass().getComponentType().isPrimitive()) {
-//                    if (arr instanceof boolean[]) 
-//                        return (A) deepClone((boolean[]) arr);
-//                    else if (arr instanceof byte[])
-//                        return (A) deepClone((byte[]) arr);
-//                    else if (arr instanceof char[])
-//                        return (A) deepClone((char[]) arr);
-//                    else if (arr instanceof short[])
-//                        return (A) deepClone((short[]) arr);
-//                    else if (arr instanceof int[])
-//                        return (A) deepClone((int[]) arr);
-//                    else if (arr instanceof long[])
-//                        return (A) deepClone((long[]) arr);
-//                    else if (arr instanceof float[])
-//                        return (A) deepClone((float[]) arr);
-//                    else if (arr instanceof double[])
-//                        return (A) deepClone((double[]) arr);
-//                    throw new IllegalStateException();
-//                    
-//                } else {
-//                    if (arr instanceof Boolean[])
-//                        return (A) deepClone((Boolean[]) arr);
-//                    else if (arr instanceof byte[])
-//                        return (A) deepClone((byte[]) arr);
-//                    else if (arr instanceof char[])
-//                        return (A) deepClone((char[]) arr);
-//                    else if (arr instanceof short[])
-//                        return (A) deepClone((short[]) arr);
-//                    else if (arr instanceof int[])
-//                        return (A) deepClone((int[]) arr);
-//                    else if (arr instanceof long[])
-//                        return (A) deepClone((long[]) arr);
-//                    else if (arr instanceof float[])
-//                        return (A) deepClone((float[]) arr);
-//                    else if (arr instanceof double[])
-//                        return (A) deepClone((double[]) arr);
-//                    throw new IllegalStateException();
-//                }
-//            }
-//            
-//        } else {
-//            return cloneObj(arr);
-//        }
-//        throw new IllegalStateException();
-//    }
-//    
-//    @SuppressWarnings("unchecked")
-//    private static <V> V cloneObj(V obj) {
-//        if (obj instanceof PublicCloneable) {
-//            PublicCloneable<?> pc = (PublicCloneable<?>) obj;
-//            return (V) pc.clone();
-//            
-//        } else {
-//            // TODO: Perform magic here.
-//            throw new UnsupportedOperationException();
-//        }
-//    }
-//    
-//    public static boolean[] deepClone(boolean[] arr) {
-//        if (arr == null) return null;
-//        else return Arrays.copyOf(arr, arr.length);
-//    }
-//
-//    public static byte[] deepClone(byte[] arr) {
-//        if (arr == null) return null;
-//        else return Arrays.copyOf(arr, arr.length);
-//    }
-//
-//    public static char[] deepClone(char[] arr) {
-//        if (arr == null) return null;
-//        else return Arrays.copyOf(arr, arr.length);
-//    }
-//
-//    public static short[] deepClone(short[] arr) {
-//        if (arr == null) return null;
-//        else return Arrays.copyOf(arr, arr.length);
-//    }
-//
-//    public static int[] deepClone(int[] arr) {
-//        if (arr == null) return null;
-//        else return Arrays.copyOf(arr, arr.length);
-//    }
-//
-//    public static long[] deepClone(long[] arr) {
-//        if (arr == null) return null;
-//        else return Arrays.copyOf(arr, arr.length);
-//    }
-//
-//    public static float[] deepClone(float[] arr) {
-//        if (arr == null) return null;
-//        else return Arrays.copyOf(arr, arr.length);
-//    }
-//
-//    public static double[] deepClone(double[] arr) {
-//        if (arr == null) return null;
-//        else return Arrays.copyOf(arr, arr.length);
-//    }
-//    
-//    public static boolean[] deepClone(Boolean[] arr) {
-//        if (arr == null) return null;
-//        else return Arrays.copyOf(arr, arr.length);
-//    }
-//
-//    public static byte[] deepClone(Byte[] arr) {
-//        if (arr == null) return null;
-//        else return Arrays.copyOf(arr, arr.length);
-//    }
-//
-//    public static char[] deepClone(Character[] arr) {
-//        if (arr == null) return null;
-//        else return Arrays.copyOf(arr, arr.length);
-//    }
-//
-//    public static short[] deepClone(Short[] arr) {
-//        if (arr == null) return null;
-//        else return Arrays.copyOf(arr, arr.length);
-//    }
-//
-//    public static int[] deepClone(Integer[] arr) {
-//        if (arr == null) return null;
-//        else return Arrays.copyOf(arr, arr.length);
-//    }
-//
-//    public static long[] deepClone(Long[] arr) {
-//        if (arr == null) return null;
-//        else return Arrays.copyOf(arr, arr.length);
-//    }
-//
-//    public static float[] deepClone(Float[] arr) {
-//        if (arr == null) return null;
-//        else return Arrays.copyOf(arr, arr.length);
-//    }
-//
-//    public static double[] deepClone(Double[] arr) {
-//        if (arr == null) return null;
-//        else return Arrays.copyOf(arr, arr.length);
-//    }
+    @SuppressWarnings("unchecked")
+    public static <A> A deepClone(A arr) {
+        if (arr == null) {
+            return null;
+
+        } else if (arr.getClass().isArray()) {
+            if (arr.getClass().getComponentType().isArray()) { // 2+D array.
+                final int length = ArrayTools.length(arr);
+                final A copy = (A) Array.newInstance(arr.getClass().getComponentType(), length);
+                for (int i = 0; i < length; i++) {
+                    set(copy, i, deepClone((Object) get(arr, i)));
+                }
+                return copy;
+
+            } else { // 1D array.
+                return copyOf(arr);
+            }
+
+        } else {
+            return cloneObj(arr);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <V> V cloneObj(V obj) {
+        if (obj instanceof PublicCloneable) {
+            PublicCloneable<?> pc = (PublicCloneable<?>) obj;
+            return (V) pc.clone();
+
+        } else {
+            // TODO: Perform magic here.
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    public static boolean[] deepClone(boolean[] arr) {
+        if (arr == null) return null;
+        else return Arrays.copyOf(arr, arr.length);
+    }
+
+    public static byte[] deepClone(byte[] arr) {
+        if (arr == null) return null;
+        else return Arrays.copyOf(arr, arr.length);
+    }
+
+    public static char[] deepClone(char[] arr) {
+        if (arr == null) return null;
+        else return Arrays.copyOf(arr, arr.length);
+    }
+
+    public static short[] deepClone(short[] arr) {
+        if (arr == null) return null;
+        else return Arrays.copyOf(arr, arr.length);
+    }
+
+    public static int[] deepClone(int[] arr) {
+        if (arr == null) return null;
+        else return Arrays.copyOf(arr, arr.length);
+    }
+
+    public static long[] deepClone(long[] arr) {
+        if (arr == null) return null;
+        else return Arrays.copyOf(arr, arr.length);
+    }
+
+    public static float[] deepClone(float[] arr) {
+        if (arr == null) return null;
+        else return Arrays.copyOf(arr, arr.length);
+    }
+
+    public static double[] deepClone(double[] arr) {
+        if (arr == null) return null;
+        else return Arrays.copyOf(arr, arr.length);
+    }
+
+    public static Boolean[] deepClone(Boolean[] arr) {
+        if (arr == null) return null;
+        else return Arrays.copyOf(arr, arr.length);
+    }
+
+    public static Byte[] deepClone(Byte[] arr) {
+        if (arr == null) return null;
+        else return Arrays.copyOf(arr, arr.length);
+    }
+
+    public static Character[] deepClone(Character[] arr) {
+        if (arr == null) return null;
+        else return Arrays.copyOf(arr, arr.length);
+    }
+
+    public static Short[] deepClone(Short[] arr) {
+        if (arr == null) return null;
+        else return Arrays.copyOf(arr, arr.length);
+    }
+
+    public static Integer[] deepClone(Integer[] arr) {
+        if (arr == null) return null;
+        else return Arrays.copyOf(arr, arr.length);
+    }
+
+    public static Long[] deepClone(Long[] arr) {
+        if (arr == null) return null;
+        else return Arrays.copyOf(arr, arr.length);
+    }
+
+    public static Float[] deepClone(Float[] arr) {
+        if (arr == null) return null;
+        else return Arrays.copyOf(arr, arr.length);
+    }
+
+    public static Double[] deepClone(Double[] arr) {
+        if (arr == null) return null;
+        else return Arrays.copyOf(arr, arr.length);
+    }
     
     
     /* ------------------------------------------------------------------------

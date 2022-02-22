@@ -38,44 +38,235 @@ public class ArrayToolsTest
     
     /* Default arrays containing edge cases for each primitive type (except void). */
     private static final boolean[] BOOLEAN_TYPE_DEFAULT_ARR =
-            new boolean[] {true, false};
+            new boolean[] { true, false };
     private static final byte[] BYTE_TYPE_DEFAULT_ARR =
-            new byte[] {Byte.MIN_VALUE, Byte.MAX_VALUE, -1, 0, 1, 10};
+            new byte[] { Byte.MIN_VALUE, Byte.MAX_VALUE, -1, 0, 1, 10 };
     private static final char[] CHAR_TYPE_DEFAULT_ARR =
-            new char[] {Character.MIN_VALUE, Character.MAX_VALUE, 0, 1, 10};
+            new char[] { Character.MIN_VALUE, Character.MAX_VALUE, 0, 1, 10 };
     private static final short[] SHORT_TYPE_DEFAULT_ARR =
-            new short[] {Short.MIN_VALUE, Short.MAX_VALUE, -1, 0, 1, 10};
+            new short[] { Short.MIN_VALUE, Short.MAX_VALUE, -1, 0, 1, 10 };
     private static final int[] INT_TYPE_DEFAULT_ARR =
-            new int[] {Integer.MIN_VALUE, Integer.MAX_VALUE, -1, 0, 1, 10};
+            new int[] { Integer.MIN_VALUE, Integer.MAX_VALUE, -1, 0, 1, 10 };
     private static final long[] LONG_TYPE_DEFAULT_ARR =
-            new long[] {Long.MIN_VALUE, Long.MAX_VALUE, -1L, 0L, 1L, 10L};
+            new long[] { Long.MIN_VALUE, Long.MAX_VALUE, -1L, 0L, 1L, 10L };
     private static final float[] FLOAT_TYPE_DEFAULT_ARR =
-            new float[] {Float.MIN_VALUE, Float.MAX_VALUE, -Float.MIN_VALUE, -Float.MAX_VALUE,
-                    Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY, Float.NaN, -1.0f, 0.0f, 1.0f, 10.5f};
+            new float[] { Float.MIN_VALUE, Float.MAX_VALUE, -Float.MIN_VALUE, -Float.MAX_VALUE,
+                    Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY, Float.NaN, -1.0f, 0.0f, 1.0f, 10.5f };
     private static final double[] DOUBLE_TYPE_DEFAULT_ARR =
-            new double[] {Double.MIN_VALUE, Double.MAX_VALUE, -Double.MIN_VALUE, -Double.MAX_VALUE,
-                    Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NaN, -1.0, 0.0, 1.0, 10.5};
+            new double[] { Double.MIN_VALUE, Double.MAX_VALUE, -Double.MIN_VALUE, -Double.MAX_VALUE,
+                    Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NaN, -1.0, 0.0, 1.0, 10.5 };
 
-    /* Default arrays containing edge cases for each counter part of the primitive types (except Void). */
+    /* Default arrays containing edge cases for each counterpart of the primitive types (except Void). */
     private final Boolean[] BOOLEAN_CLASS_DEFAULT_ARR =
-            new Boolean[] {true, false};
+            new Boolean[] { true, false };
     private static final Byte[] BYTE_CLASS_DEFAULT_ARR =
-            new Byte[] {Byte.MIN_VALUE, Byte.MAX_VALUE, -1, 0, 1, 10};
+            new Byte[] { Byte.MIN_VALUE, Byte.MAX_VALUE, -1, 0, 1, 10 };
     private static final Character[] CHAR_CLASS_DEFAULT_ARR =
-            new Character[] {Character.MIN_VALUE, Character.MAX_VALUE, 0, 1, 10};
+            new Character[] { Character.MIN_VALUE, Character.MAX_VALUE, 0, 1, 10 };
     private static final Short[] SHORT_CLASS_DEFAULT_ARR =
-            new Short[] {Short.MIN_VALUE, Short.MAX_VALUE, -1, 0, 1, 10};
+            new Short[] { Short.MIN_VALUE, Short.MAX_VALUE, -1, 0, 1, 10 };
     private static final Integer[] INT_CLASS_DEFAULT_ARR =
-            new Integer[] {Integer.MIN_VALUE, Integer.MAX_VALUE, -1, 0, 1, 10};
+            new Integer[] { Integer.MIN_VALUE, Integer.MAX_VALUE, -1, 0, 1, 10 };
     private static final Long[] LONG_CLASS_DEFAULT_ARR =
-            new Long[] {Long.MIN_VALUE, Long.MAX_VALUE, -1L, 0L, 1L, 10L};
+            new Long[] { Long.MIN_VALUE, Long.MAX_VALUE, -1L, 0L, 1L, 10L };
     private static final Float[] FLOAT_CLASS_DEFAULT_ARR =
-            new Float[] {Float.MIN_VALUE, Float.MAX_VALUE, -Float.MIN_VALUE, -Float.MAX_VALUE,
-                    Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY, Float.NaN, -1.0f, 0.0f, 1.0f, 10.5f};
+            new Float[] { Float.MIN_VALUE, Float.MAX_VALUE, -Float.MIN_VALUE, -Float.MAX_VALUE,
+                    Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY, Float.NaN, -1.0f, 0.0f, 1.0f, 10.5f };
     private static final Double[] DOUBLE_CLASS_DEFAULT_ARR =
-            new Double[] {Double.MIN_VALUE, Double.MAX_VALUE, -Double.MIN_VALUE, -Double.MAX_VALUE,
-                    Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NaN, -1.0, 0.0, 1.0, 10.5};
+            new Double[] { Double.MIN_VALUE, Double.MAX_VALUE, -Double.MIN_VALUE, -Double.MAX_VALUE,
+                    Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NaN, -1.0, 0.0, 1.0, 10.5 };
 
+
+    /* ------------------------------------------------------------------------
+     * deepClone functions.
+     * ------------------------------------------------------------------------
+     */
+    private <A, T> void deepCloneMod(A arr, Function<T, T> f) {
+        for (int i = 0; i < ArrayTools.length(arr); i++) {
+            if (ArrayTools.get(arr, i) == null) {
+                ArrayTools.set(arr, i, f.apply(null));
+            } else if (ArrayTools.get(arr, i).getClass().isArray()) {
+                deepCloneMod(ArrayTools.get(arr, i), f);
+            } else {
+                ArrayTools.set(arr, i, f.apply(ArrayTools.get(arr, i)));
+            }
+        }
+    }
+    
+    private <A, T> void deepCloneShallowModTest(A arr, Function<T, T> f) {
+        A arr2 = ArrayTools.copyOf(arr);
+        A clone = ArrayTools.deepClone(arr);
+        deepCloneMod(arr, f);
+        assertTrue(ArrayTools.deepEquals(clone, arr2));
+    }
+    
+    private <A, T> void deepCloneDeepModTest(A arr, A res, Function<T, T> f) {
+        A clone = ArrayTools.deepClone(arr);
+        deepCloneMod(arr, f);
+        assertTrue(ArrayTools.deepEquals(clone, res));
+    }
+    
+    @Test
+    public void deepCloneBoolean() {
+        {
+            boolean[] arr = new boolean[] { true, false };
+            deepCloneShallowModTest(arr, (Boolean b) -> !b);
+            
+            boolean[][] arr2 = new boolean[][] { { true }, { false } };
+            boolean[][] arr2Res = new boolean[][] { { true }, { false } };
+            deepCloneDeepModTest(arr2, arr2Res, (Boolean b) -> !b);
+            
+        }
+        {
+            Boolean[] arr = new Boolean[] { true, false };
+            deepCloneShallowModTest(arr, (Boolean b) -> !b);
+
+            Boolean[][] arr2 = new Boolean[][] { { true }, { false } };
+            Boolean[][] arr2Res = new Boolean[][] { { true }, { false } };
+            deepCloneDeepModTest(arr2, arr2Res, (Boolean b) -> !b);
+        }
+    }
+
+    @Test
+    public void deepCloneByte() {
+        {
+            byte[] arr = new byte[] { 0, 1 };
+            deepCloneShallowModTest(arr, (Byte b) -> (byte) ~b);
+
+            byte[][] arr2 = new byte[][] { { 0 }, { 1 } };
+            byte[][] arr2Res = new byte[][] { { 0 }, { 1 } };
+            deepCloneDeepModTest(arr2, arr2Res, (Byte b) -> (byte) ~b);
+        }
+        {
+            Byte[] arr = new Byte[] { 0, 1 };
+            deepCloneShallowModTest(arr, (Byte b) -> (byte) ~b);
+
+            Byte[][] arr2 = new Byte[][] { { 0 }, { 1 } };
+            Byte[][] arr2Res = new Byte[][] { { 0 }, { 1 } };
+            deepCloneDeepModTest(arr2, arr2Res, (Byte b) -> (byte) ~b);
+        }
+    }
+
+    @Test
+    public void deepCloneShort() {
+        {
+            short[] arr = new short[] { 0, 1 };
+            deepCloneShallowModTest(arr, (Short b) -> (short) ~b);
+
+            short[][] arr2 = new short[][] { { 0 }, { 1 } };
+            short[][] arr2Res = new short[][] { { 0 }, { 1 } };
+            deepCloneDeepModTest(arr2, arr2Res, (Short b) -> (short) ~b);
+        }
+        {
+            Short[] arr = new Short[] { 0, 1 };
+            deepCloneShallowModTest(arr, (Short b) -> (short) ~b);
+
+            Short[][] arr2 = new Short[][] { { 0 }, { 1 } };
+            Short[][] arr2Res = new Short[][] { { 0 }, { 1 } };
+            deepCloneDeepModTest(arr2, arr2Res, (Short b) -> (short) ~b);
+        }
+    }
+
+    @Test
+    public void deepCloneCharacter() {
+        {
+            char[] arr = new char[] { 0, 1 };
+            deepCloneShallowModTest(arr, (Character b) -> (char) ~b);
+
+            char[][] arr2 = new char[][] { { 0 }, { 1 } };
+            char[][] arr2Res = new char[][] { { 0 }, { 1 } };
+            deepCloneDeepModTest(arr2, arr2Res, (Character b) -> (char) ~b);
+        }
+        {
+            Character[] arr = new Character[] { 0, 1 };
+            deepCloneShallowModTest(arr, (Character b) -> (char) ~b);
+
+            Character[][] arr2 = new Character[][] { { 0 }, { 1 } };
+            Character[][] arr2Res = new Character[][] { { 0 }, { 1 } };
+            deepCloneDeepModTest(arr2, arr2Res, (Character b) -> (char) ~b);
+        }
+    }
+
+    @Test
+    public void deepCloneInteger() {
+        {
+            int[] arr = new int[] { 0, 1 };
+            deepCloneShallowModTest(arr, (Integer b) -> ~b);
+
+            int[][] arr2 = new int[][] { { 0 }, { 1 } };
+            int[][] arr2Res = new int[][] { { 0 }, { 1 } };
+            deepCloneDeepModTest(arr2, arr2Res, (Integer b) -> ~b);
+        }
+        {
+            Integer[] arr = new Integer[] { 0, 1 };
+            deepCloneShallowModTest(arr, (Integer b) -> ~b);
+
+            Integer[][] arr2 = new Integer[][] { { 0 }, { 1 } };
+            Integer[][] arr2Res = new Integer[][] { { 0 }, { 1 } };
+            deepCloneDeepModTest(arr2, arr2Res, (Integer b) -> ~b);
+        }
+    }
+
+    @Test
+    public void deepCloneLong() {
+        {
+            long[] arr = new long[] { 0L, 1L };
+            deepCloneShallowModTest(arr, (Long b) -> ~b);
+
+            long[][] arr2 = new long[][] { { 0L }, { 1L } };
+            long[][] arr2Res = new long[][] { { 0L }, { 1L } };
+            deepCloneDeepModTest(arr2, arr2Res, (Long b) -> ~b);
+        }
+        {
+            Long[] arr = new Long[] { 0L, 1L };
+            deepCloneShallowModTest(arr, (Long b) -> ~b);
+
+            Long[][] arr2 = new Long[][] { { 0L }, { 1L } };
+            Long[][] arr2Res = new Long[][] { { 0L }, { 1L } };
+            deepCloneDeepModTest(arr2, arr2Res, (Long b) -> ~b);
+        }
+    }
+
+    @Test
+    public void deepCloneFloat() {
+        {
+            float[] arr = new float[] { 0f, 1f };
+            deepCloneShallowModTest(arr, (Float b) -> -b);
+
+            float[][] arr2 = new float[][] { { 0f }, { 1f } };
+            float[][] arr2Res = new float[][] { { 0f }, { 1f } };
+            deepCloneDeepModTest(arr2, arr2Res, (Float b) -> -b);
+        }
+        {
+            Float[] arr = new Float[] { 0f, 1f };
+            deepCloneShallowModTest(arr, (Float b) -> -b);
+
+            Float[][] arr2 = new Float[][] { { 0f }, { 1f } };
+            Float[][] arr2Res = new Float[][] { { 0f }, { 1f } };
+            deepCloneDeepModTest(arr2, arr2Res, (Float b) -> -b);
+        }
+    }
+
+    @Test
+    public void deepCloneDouble() {
+        {
+            double[] arr = new double[] { 0d, 1d };
+            deepCloneShallowModTest(arr, (Double b) -> -b);
+
+            double[][] arr2 = new double[][] { { 0d }, { 1d } };
+            double[][] arr2Res = new double[][] { { 0d }, { 1d } };
+            deepCloneDeepModTest(arr2, arr2Res, (Double b) -> -b);
+        }
+        {
+            Double[] arr = new Double[] { 0d, 1d };
+            deepCloneShallowModTest(arr, (Double b) -> -b);
+
+            Double[][] arr2 = new Double[][] { { 0d }, { 1d } };
+            Double[][] arr2Res = new Double[][] { { 0d }, { 1d } };
+            deepCloneDeepModTest(arr2, arr2Res, (Double b) -> -b);
+        }
+    }
+    
     
     /* ------------------------------------------------------------------------
      * toDeepString functions.
@@ -205,7 +396,6 @@ public class ArrayToolsTest
         return sb.toString();
     }
     
-    @SuppressWarnings("DuplicateExpressions") // For simplification of though process.
     private static String fillNumber(String strNum, int length, boolean allowNeg) {
         StringBuilder sb = new StringBuilder();
         if (allowNeg) {
