@@ -226,74 +226,6 @@ public abstract class AbstractTest {
                 fail("One of the runs timed out!");
             }
         }
-
-
-//        Thread ct = Thread.currentThread();
-//        AtomicBoolean exceptionOccurred = new AtomicBoolean(false);
-//        ThreadGroup tg = new ThreadGroup("runners") {
-//            @Override
-//            public void uncaughtException(Thread t, Throwable e) {
-//                System.err.println(t.getName()+ ": " + System.lineSeparator() +
-//                        "  " + Arrays.toString(e.getStackTrace())
-//                        .replaceAll(", ", "," + System.lineSeparator() + "  "));
-//                ct.interrupt();
-//                exceptionOccurred.set(true);
-//            }
-//        };
-//        Thread[] threads = new Thread[amt];
-//        for (int i = 0; i < amt; i++) {
-//            threads[i] = new Thread(tg, () -> {
-//                MultiTool.runLock(THREAD_LOCK, () -> threadCount++);
-//                try {
-//                    wrap(er).run();
-//                    
-//                } finally {
-//                    THREAD_LOCK.lock();
-//                    try {
-//                        if (--threadCount < MAX_THREADS) {
-//                            THREAD_FINISHED.signal();
-//                        }
-//                        
-//                    } finally {
-//                        THREAD_LOCK.unlock();
-//                    }
-//                }
-//            }, "runner " + i);
-//        }
-//        
-//        THREAD_LOCK.lock();
-//        try {
-//            for (int i = 0; i < amt; i++) {
-//                while (threadCount < MAX_THREADS) {
-//                    THREAD_FINISHED.await();
-//                }
-//                threads[i].start();
-//            }
-//            
-//        } catch (Throwable e) {
-//            fail("One of the runs has failed!");
-//            
-//        } finally {
-//            THREAD_LOCK.unlock();
-//        }
-//
-//        long start = System.currentTimeMillis();
-//        try {
-//            for (int i = 0; i < amt; i++) {
-//                long timeout = start - System.currentTimeMillis() + millis;
-//                if (timeout <= 0) fail("Timed out!");
-//                threads[i].join(timeout);
-//            }
-//        } catch (Throwable e) {
-//            fail("One of the runs has failed!");
-//            
-//        } finally {
-//            for (Thread t : threads) {
-//                if (t.isAlive()) {
-//                    t.interrupt();
-//                }
-//            }
-//        }
     }
 
     /**
@@ -357,9 +289,10 @@ public abstract class AbstractTest {
      *         primitive part exists, then the same as the input.
      */
     protected static Class<?> switchPrimObjClass(Class<?> c) {
-        if (c == null)
-            return c;
-        else if (c.isPrimitive()) {
+        if (c == null) {
+            return null;
+            
+        } else if (c.isPrimitive()) {
             if (Objects.equals(c, Boolean.TYPE))
                 return Boolean.class;
             else if (Objects.equals(c, Byte.TYPE))
